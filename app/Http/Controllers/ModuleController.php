@@ -55,6 +55,7 @@ class ModuleController extends Controller
             'menuItems' => $menuItems,
             'records' => $this->recordsForModule($module),
             'lookups' => $this->lookupData(),
+            'editRecord' => null,
         ]);
     }
 
