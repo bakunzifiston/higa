@@ -59,6 +59,30 @@ class ModuleController extends Controller
         ]);
     }
 
+    public function edit(string $module, int $id): View
+    {
+        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
+
+        [$stats, $menuItems] = $this->dashboardData($module);
+
+        $editRecord = match ($module) {
+            'farmers' => Farmer::query()->findOrFail($id),
+            'locations' => Location::query()->findOrFail($id),
+            'products' => Product::query()->findOrFail($id),
+            'collections' => MaizeCollection::query()->findOrFail($id),
+        };
+
+        return view('modules.index', [
+            'module' => $module,
+            'navActive' => $module,
+            'stats' => $stats,
+            'menuItems' => $menuItems,
+            'records' => $this->recordsForModule($module),
+            'lookups' => $this->lookupData(),
+            'editRecord' => $editRecord,
+        ]);
+    }
+
     public function store(Request $request, string $module): RedirectResponse
     {
         abort_unless(in_array($module, $this->allowedModules(), true), 404);
@@ -133,7 +157,7 @@ class ModuleController extends Controller
 
     public function update(Request $request, string $module, int $id): RedirectResponse
     {
-        abort_unless(in_array($module, ['farmers', 'locations', 'products'], true), 404);
+        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
 
         match ($module) {
             'farmers' => Farmer::query()->findOrFail($id)->update($request->validate([
@@ -162,6 +186,15 @@ class ModuleController extends Controller
                 'sku' => ['required', 'string', 'max:120', Rule::unique('products', 'sku')->ignore($id)],
                 'is_active' => ['nullable', 'boolean'],
             ])),
+            'collections' => MaizeCollection::query()->findOrFail($id)->update($request->validate([
+                'farmer_id' => ['required', 'integer', 'exists:farmers,id'],
+                'location_id' => ['required', 'integer', 'exists:locations,id'],
+                'collection_date' => ['required', 'date'],
+                'quantity_collected' => ['required', 'numeric', 'gt:0'],
+                'quantity_rejected' => ['nullable', 'numeric', 'gte:0'],
+                'rejection_reason' => ['nullable', 'string'],
+                'price_per_kg' => ['required', 'numeric', 'gt:0'],
+            ])),
         };
 
         return redirect()->route('modules.show', ['module' => $module])->with('success', 'Record updated.');
@@ -169,12 +202,13 @@ class ModuleController extends Controller
 
     public function destroy(string $module, int $id): RedirectResponse
     {
-        abort_unless(in_array($module, ['farmers', 'locations', 'products'], true), 404);
+        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
 
         match ($module) {
             'farmers' => Farmer::query()->findOrFail($id)->delete(),
             'locations' => Location::query()->findOrFail($id)->delete(),
             'products' => Product::query()->findOrFail($id)->delete(),
+            'collections' => MaizeCollection::query()->findOrFail($id)->delete(),
         };
 
         return redirect()->route('modules.show', ['module' => $module])->with('success', 'Record deleted.');

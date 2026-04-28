@@ -15,7 +15,7 @@
     <aside class="sidebar">
         <div class="brand">
             <span class="brand-mark" aria-hidden="true"></span>
-            <span class="brand-text">HIGA<span style="color:#d8ba4a">GROUP</span></span>
+            <span class="brand-text">HIGA<span style="color:#d8ba4a">GROUP</span>
         </div>
         <nav class="menu">
             @foreach($menuItems as $item)
@@ -33,7 +33,6 @@
             <div>
                 <div class="user-name">{{ auth()->user()->name }}</div>
                 <div class="user-role">Administrator</div>
-            </div>
         </div>
         <div class="spacer"></div>
         <form method="POST" action="{{ route('logout') }}">
@@ -43,7 +42,7 @@
     </aside>
 
     <main class="main">
-        <div class="topbar-ims">
+        <div class="topbar-ims"><img src="{{ asset('higalog.jpg') }}" alt="HigaGroup" style="max-height:32px;width:auto;border-radius:4px;">
             <span class="topbar-ims-title">{{ ucfirst(str_replace('-', ' ', $module)) }}</span>
             <div class="topbar-account">
                 <a href="{{ route('profile.edit') }}" class="topbar-link">Profile</a>
@@ -52,7 +51,6 @@
                     <button type="submit" class="topbar-link-btn">Log out</button>
                 </form>
             </div>
-        </div>
         <section class="card">
             <h1 class="title">{{ str_replace('-', ' ', $module) }} records</h1>
             <p class="sub">Create and manage module records from the web interface.</p>
@@ -69,7 +67,7 @@
 
         @php
             $canCreate = !in_array($module, ['raw-inventory', 'finished-inventory']);
-            $showForm = $canCreate && ($errors->any() || count(old()) > 0);
+            $showForm = $canCreate && ($editRecord || $errors->any() || count(old()) > 0);
         @endphp
         <section class="card">
             @if(session('success'))
@@ -80,7 +78,7 @@
             @endif
 
             <div class="form-toolbar">
-                <h3 style="margin:0;">{{ str_replace('-', ' ', $module) }} form</h3>
+                <h3 style="margin:0;">{{ $editRecord ? 'Edit #' . $editRecord->id : str_replace('-', ' ', $module) . ' form' }}</h3>
                 @if($canCreate)
                     <button type="button" class="primary" id="show-form-btn">Add Record</button>
                 @else
@@ -91,42 +89,43 @@
             <div id="module-form-modal" class="modal-overlay {{ $showForm ? 'is-open' : '' }}">
             <div class="modal-card" role="dialog" aria-modal="true" aria-label="Add record form">
             <div class="modal-header">
-                <h3>Add {{ str_replace('-', ' ', $module) }} record</h3>
+                <h3>{{ $editRecord ? 'Edit' : 'Add' }} {{ str_replace('-', ' ', $module) }} record</h3>
                 <button class="icon-close" id="close-form-btn" type="button" aria-label="Close">×</button>
             </div>
-            <form method="POST" action="{{ route('modules.store', ['module' => $module]) }}" class="form-grid">
+            <form method="POST" action="{{ $editRecord ? route('modules.update', ['module' => $module, 'id' => $editRecord->id]) : route('modules.store', ['module' => $module]) }}" class="form-grid">
                 @csrf
+                @if($editRecord) @method('PUT') @endif
 
                 @if($module === 'farmers')
-                    <div><label>Name</label><input name="name" required></div>
-                    <div><label>Phone</label><input name="phone" required></div>
-                    <div><label>Country</label><input name="country" value="Rwanda" required></div>
-                    <div><label>Province</label><input name="province" required></div>
-                    <div><label>District</label><input name="district" required></div>
-                    <div><label>Sector</label><input name="sector" required></div>
-                    <div><label>Cell</label><input name="cell" required></div>
-                    <div><label>Village</label><input name="village" required></div>
+                    <div><label>Name</label><input name="name" value="{{ old('name', $editRecord->name ?? '') }}" required></div>
+                    <div><label>Phone</label><input name="phone" value="{{ old('phone', $editRecord->phone ?? '') }}" required></div>
+                    <div><label>Country</label><input name="country" value="{{ old('country', $editRecord->country ?? 'Rwanda') }}" required></div>
+                    <div><label>Province</label><input name="province" value="{{ old('province', $editRecord->province ?? '') }}" required></div>
+                    <div><label>District</label><input name="district" value="{{ old('district', $editRecord->district ?? '') }}" required></div>
+                    <div><label>Sector</label><input name="sector" value="{{ old('sector', $editRecord->sector ?? '') }}" required></div>
+                    <div><label>Cell</label><input name="cell" value="{{ old('cell', $editRecord->cell ?? '') }}" required></div>
+                    <div><label>Village</label><input name="village" value="{{ old('village', $editRecord->village ?? '') }}" required></div>
                 @elseif($module === 'locations')
-                    <div><label>Name</label><input name="name" required></div>
-                    <div><label>Code</label><input name="code" required></div>
-                    <div><label>Country</label><input name="country" value="Rwanda" required></div>
-                    <div><label>Province</label><input name="province" required></div>
-                    <div><label>District</label><input name="district" required></div>
-                    <div><label>Sector</label><input name="sector" required></div>
-                    <div><label>Cell</label><input name="cell" required></div>
-                    <div><label>Village</label><input name="village" required></div>
+                    <div><label>Name</label><input name="name" value="{{ old('name', $editRecord->name ?? '') }}" required></div>
+                    <div><label>Code</label><input name="code" value="{{ old('code', $editRecord->code ?? '') }}" required></div>
+                    <div><label>Country</label><input name="country" value="{{ old('country', $editRecord->country ?? 'Rwanda') }}" required></div>
+                    <div><label>Province</label><input name="province" value="{{ old('province', $editRecord->province ?? '') }}" required></div>
+                    <div><label>District</label><input name="district" value="{{ old('district', $editRecord->district ?? '') }}" required></div>
+                    <div><label>Sector</label><input name="sector" value="{{ old('sector', $editRecord->sector ?? '') }}" required></div>
+                    <div><label>Cell</label><input name="cell" value="{{ old('cell', $editRecord->cell ?? '') }}" required></div>
+                    <div><label>Village</label><input name="village" value="{{ old('village', $editRecord->village ?? '') }}" required></div>
                 @elseif($module === 'collections')
-                    <div><label>Farmer</label><select name="farmer_id" required>@foreach($lookups['farmers'] as $f)<option value="{{ $f->id }}">{{ $f->name }}</option>@endforeach</select></div>
-                    <div><label>Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}">{{ $l->name }}</option>@endforeach</select></div>
-                    <div><label>Date</label><input type="date" name="collection_date" value="{{ $lookups['today'] }}" required></div>
-                    <div><label>Collected Qty</label><input type="number" step="0.001" name="quantity_collected" required></div>
-                    <div><label>Rejected Qty</label><input type="number" step="0.001" name="quantity_rejected" value="0"></div>
-                    <div><label>Price per Kg</label><input type="number" step="0.01" name="price_per_kg" required></div>
-                    <div class="full"><label>Rejection Reason</label><input name="rejection_reason"></div>
+                    <div><label>Farmer</label><select name="farmer_id" required>@foreach($lookups['farmers'] as $f)<option value="{{ $f->id }}" {{ old('farmer_id', $editRecord->farmer_id ?? '') == $f->id ? 'selected' : '' }}>{{ $f->name }}</option>@endforeach</select></div>
+                    <div><label>Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}" {{ old('location_id', $editRecord->location_id ?? '') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>@endforeach</select></div>
+                    <div><label>Date</label><input type="date" name="collection_date" value="{{ old('collection_date', $editRecord->collection_date?->format('Y-m-d') ?? $lookups['today']) }}" required></div>
+                    <div><label>Collected Qty</label><input type="number" step="0.001" name="quantity_collected" value="{{ old('quantity_collected', $editRecord->quantity_collected ?? '') }}" required></div>
+                    <div><label>Rejected Qty</label><input type="number" step="0.001" name="quantity_rejected" value="{{ old('quantity_rejected', $editRecord->quantity_rejected ?? '0') }}"></div>
+                    <div><label>Price per Kg</label><input type="number" step="0.01" name="price_per_kg" value="{{ old('price_per_kg', $editRecord->price_per_kg ?? '') }}" required></div>
+                    <div class="full"><label>Rejection Reason</label><input name="rejection_reason" value="{{ old('rejection_reason', $editRecord->rejection_reason ?? '') }}"></div>
                 @elseif($module === 'products')
-                    <div><label>Name</label><input name="name" required></div>
-                    <div><label>SKU</label><input name="sku" required></div>
-                    <div><label>Active</label><select name="is_active"><option value="1">Yes</option><option value="0">No</option></select></div>
+                    <div><label>Name</label><input name="name" value="{{ old('name', $editRecord->name ?? '') }}" required></div>
+                    <div><label>SKU</label><input name="sku" value="{{ old('sku', $editRecord->sku ?? '') }}" required></div>
+                    <div><label>Active</label><select name="is_active"><option value="1" {{ old('is_active', $editRecord->is_active ?? 1) == '1' ? 'selected' : '' }}>Yes</option><option value="0" {{ old('is_active', $editRecord->is_active ?? 1) == '0' ? 'selected' : '' }}>No</option></select></div>
                 @elseif($module === 'production')
                     <div><label>Batch Number</label><input name="batch_number" required></div>
                     <div><label>Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}">{{ $l->name }}</option>@endforeach</select></div>
@@ -177,12 +176,11 @@
 
                 @if($canCreate)
                     <div class="full actions">
-                        <button class="primary" type="submit">Save Record</button>
-                        <button class="secondary" id="cancel-form-btn" type="button">Cancel</button>
+                        <button class="primary" type="submit">{{ $editRecord ? 'Update Record' : 'Save Record' }}</button>
+                        @if($editRecord)<a href="{{ route('modules.show', ['module' => $module]) }}" class="secondary" style="text-decoration:none;padding:0.5rem 1rem;">Cancel</a>@else<button class="secondary" id="cancel-form-btn" type="button">Cancel</button>@endif
                     </div>
                 @endif
             </form>
-            </div>
             </div>
         </section>
 
@@ -194,7 +192,7 @@
                     <th>ID</th>
                     <th>Summary</th>
                     <th>Date</th>
-                    @if(in_array($module, ['farmers','locations','products']))
+                    @if(in_array($module, ['farmers','locations','collections','products']))
                         <th>Actions</th>
                     @endif
                 </tr>
@@ -207,7 +205,7 @@
                             @switch($module)
                                 @case('farmers') {{ $record->name }} ({{ $record->phone }}) @break
                                 @case('locations') {{ $record->name }} - {{ $record->code }} @break
-                                @case('collections') Farmer: {{ optional($record->farmer)->name }} / Accepted: {{ $record->accepted_quantity }} @break
+                                @case('collections') Farmer: {{ optional($record->farmer)->name }} / Location: {{ optional($record->location)->name }} / Collected: {{ $record->quantity_collected }} / Accepted: {{ $record->accepted_quantity }} / Price: {{ $record->price_per_kg }} @break
                                 @case('raw-inventory') {{ $record->type }} - {{ $record->quantity }} ({{ $record->source }}) @break
                                 @case('production') {{ $record->batch_number }} / Produced: {{ $record->quantity_produced }} @break
                                 @case('products') {{ $record->name }} ({{ $record->sku }}) @break
@@ -219,8 +217,9 @@
                             @endswitch
                         </td>
                         <td>{{ $record->created_at?->format('Y-m-d H:i') ?? '-' }}</td>
-                        @if(in_array($module, ['farmers','locations','products']))
+                        @if(in_array($module, ['farmers','locations','collections','products']))
                             <td class="actions">
+                                <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;padding:0.35rem 0.75rem;">Edit</a>
                                 <form method="POST" action="{{ route('modules.destroy', ['module' => $module, 'id' => $record->id]) }}" onsubmit="return confirm('Delete this record?')">
                                     @csrf
                                     @method('DELETE')
@@ -230,7 +229,7 @@
                         @endif
                     </tr>
                 @empty
-                    <tr><td colspan="4">No records yet.</td></tr>
+                    <tr><td colspan="{{ in_array($module, ['farmers','locations','collections','products']) ? '4' : '3' }}">No records yet.</td></tr>
                 @endforelse
                 </tbody>
             </table>
