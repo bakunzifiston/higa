@@ -15,6 +15,7 @@ class MaizeCollection extends Model
     protected $fillable = [
         'farmer_id',
         'location_id',
+        'product_name',
         'collection_date',
         'quantity_collected',
         'quantity_rejected',

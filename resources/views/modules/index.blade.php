@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ ucfirst(str_replace('-', ' ', $module)) }} - HigaGroup</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @if (file_exists(public_path('hot')) || file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/modules.css', 'resources/js/modules.js'])
     @else
@@ -19,7 +20,10 @@
         </div>
         <nav class="menu">
             @foreach($menuItems as $item)
-                <a href="{{ $item['href'] }}" class="{{ $navActive === $item['slug'] ? 'active' : '' }}">{{ $item['label'] }}</a>
+                <a href="{{ $item['href'] }}" class="{{ $navActive === $item['slug'] ? 'active' : '' }}">
+                    <i class="fas {{ $item['icon'] ?? 'fa-circle' }}"></i>
+                    {{ $item['label'] }}
+                </a>
             @endforeach
         </nav>
         <div class="user-box">
@@ -37,32 +41,45 @@
         <div class="spacer"></div>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button class="logout-btn" type="submit">Log out</button>
+            <button class="logout-btn" type="submit">
+                <i class="fas fa-sign-out-alt"></i> Log out
+            </button>
         </form>
     </aside>
 
     <main class="main">
-        <div class="topbar-ims"><img src="{{ asset('higalog.jpg') }}" alt="HigaGroup" style="max-height:32px;width:auto;border-radius:4px;">
-            <span class="topbar-ims-title">{{ ucfirst(str_replace('-', ' ', $module)) }}</span>
+        <div class="topbar-ims">
+            <div class="topbar-ims-title">
+                <i class="fas fa-layer-group"></i>
+                {{ ucfirst(str_replace('-', ' ', $module)) }}
+            </div>
             <div class="topbar-account">
-                <a href="{{ route('profile.edit') }}" class="topbar-link">Profile</a>
+                <a href="{{ route('profile.edit') }}" class="topbar-link">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
                 <form method="POST" action="{{ route('logout') }}" class="logout-inline">
                     @csrf
-                    <button type="submit" class="topbar-link-btn">Log out</button>
+                    <button type="submit" class="topbar-link-btn">
+                        <i class="fas fa-power-off"></i> Log out
+                    </button>
                 </form>
             </div>
+
         <section class="card">
-            <h1 class="title">{{ str_replace('-', ' ', $module) }} records</h1>
+            <h1 class="title">
+                <i class="fas fa-database"></i>
+                {{ str_replace('-', ' ', $module) }} records
+            </h1>
             <p class="sub">Create and manage module records from the web interface.</p>
         </section>
 
         <section class="stats">
-            <div class="stat"><b>{{ $stats['farmers'] }}</b><span>Farmers</span></div>
-            <div class="stat"><b>{{ $stats['locations'] }}</b><span>Locations</span></div>
-            <div class="stat"><b>{{ $stats['collections'] }}</b><span>Collections</span></div>
-            <div class="stat"><b>{{ $stats['products'] }}</b><span>Products</span></div>
-            <div class="stat"><b>{{ $stats['production_batches'] }}</b><span>Batches</span></div>
-            <div class="stat"><b>{{ $stats['sales'] }}</b><span>Sales</span></div>
+            <div class="stat"><b>{{ $stats['farmers'] }}</b><span><i class="fas fa-tractor" style="margin-right:4px;color:var(--brand-green-dark)"></i>Farmers</span></div>
+            <div class="stat"><b>{{ $stats['locations'] }}</b><span><i class="fas fa-map-marker-alt" style="margin-right:4px;color:var(--brand-green-dark)"></i>Locations</span></div>
+            <div class="stat"><b>{{ $stats['collections'] }}</b><span><i class="fas fa-seedling" style="margin-right:4px;color:var(--brand-green-dark)"></i>Collections</span></div>
+            <div class="stat"><b>{{ $stats['products'] }}</b><span><i class="fas fa-boxes" style="margin-right:4px;color:var(--brand-green-dark)"></i>Products</span></div>
+            <div class="stat"><b>{{ $stats['production_batches'] }}</b><span><i class="fas fa-industry" style="margin-right:4px;color:var(--brand-green-dark)"></i>Batches</span></div>
+            <div class="stat"><b>{{ $stats['sales'] }}</b><span><i class="fas fa-chart-line" style="margin-right:4px;color:var(--brand-green-dark)"></i>Sales</span></div>
         </section>
 
         @php
@@ -71,113 +88,113 @@
         @endphp
         <section class="card">
             @if(session('success'))
-                <p class="success">{{ session('success') }}</p>
+                <p class="success"><i class="fas fa-check-circle"></i> {{ session('success') }}</p>
             @endif
             @if($errors->any())
-                <p class="error">{{ $errors->first() }}</p>
+                <p class="error"><i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}</p>
             @endif
 
             <div class="form-toolbar">
-                <h3 style="margin:0;">{{ $editRecord ? 'Edit #' . $editRecord->id : str_replace('-', ' ', $module) . ' form' }}</h3>
+                <h3 style="margin:0;"><i class="fas {{ $editRecord ? 'fa-pen' : 'fa-plus-circle' }}" style="margin-right:6px;color:var(--brand-green-dark)"></i>{{ $editRecord ? 'Edit #' . $editRecord->id : str_replace('-', ' ', $module) . ' form' }}</h3>
                 @if($canCreate)
-                    <button type="button" class="primary" id="show-form-btn">Add Record</button>
+                    <button type="button" class="primary" id="show-form-btn"><i class="fas fa-plus"></i> Add Record</button>
                 @else
-                    <span class="sub">Read-only ledger module</span>
+                    <span class="sub"><i class="fas fa-lock"></i> Read-only ledger module</span>
                 @endif
             </div>
 
             <div id="module-form-modal" class="modal-overlay {{ $showForm ? 'is-open' : '' }}">
             <div class="modal-card" role="dialog" aria-modal="true" aria-label="Add record form">
             <div class="modal-header">
-                <h3>{{ $editRecord ? 'Edit' : 'Add' }} {{ str_replace('-', ' ', $module) }} record</h3>
-                <button class="icon-close" id="close-form-btn" type="button" aria-label="Close">×</button>
+                <h3><i class="fas {{ $editRecord ? 'fa-pen' : 'fa-plus' }}" style="margin-right:6px;color:var(--brand-green-dark)"></i>{{ $editRecord ? 'Edit' : 'Add' }} {{ str_replace('-', ' ', $module) }} record</h3>
+                <button class="icon-close" id="close-form-btn" type="button" aria-label="Close"><i class="fas fa-times"></i></button>
             </div>
             <form method="POST" action="{{ $editRecord ? route('modules.update', ['module' => $module, 'id' => $editRecord->id]) : route('modules.store', ['module' => $module]) }}" class="form-grid">
                 @csrf
                 @if($editRecord) @method('PUT') @endif
 
                 @if($module === 'farmers')
-                    <div><label>Name</label><input name="name" value="{{ old('name', $editRecord->name ?? '') }}" required></div>
-                    <div><label>Phone</label><input name="phone" value="{{ old('phone', $editRecord->phone ?? '') }}" required></div>
-                    <div><label>Country</label><input name="country" value="{{ old('country', $editRecord->country ?? 'Rwanda') }}" required></div>
-                    <div><label>Province</label><input name="province" value="{{ old('province', $editRecord->province ?? '') }}" required></div>
-                    <div><label>District</label><input name="district" value="{{ old('district', $editRecord->district ?? '') }}" required></div>
-                    <div><label>Sector</label><input name="sector" value="{{ old('sector', $editRecord->sector ?? '') }}" required></div>
-                    <div><label>Cell</label><input name="cell" value="{{ old('cell', $editRecord->cell ?? '') }}" required></div>
-                    <div><label>Village</label><input name="village" value="{{ old('village', $editRecord->village ?? '') }}" required></div>
+                    <div><label><i class="fas fa-user" style="margin-right:4px"></i> Name</label><input name="name" value="{{ old('name', $editRecord?->name ?? '') }}" required></div>
+                    <div><label><i class="fas fa-phone" style="margin-right:4px"></i> Phone</label><input name="phone" value="{{ old('phone', $editRecord?->phone ?? '') }}" required></div>
+                    <div><label><i class="fas fa-globe" style="margin-right:4px"></i> Country</label><input name="country" value="{{ old('country', $editRecord?->country ?? 'Rwanda') }}" required></div>
+                    <div><label><i class="fas fa-map" style="margin-right:4px"></i> Province</label><input name="province" value="{{ old('province', $editRecord?->province ?? '') }}" required></div>
+                    <div><label><i class="fas fa-city" style="margin-right:4px"></i> District</label><input name="district" value="{{ old('district', $editRecord?->district ?? '') }}" required></div>
+                    <div><label><i class="fas fa-building" style="margin-right:4px"></i> Sector</label><input name="sector" value="{{ old('sector', $editRecord?->sector ?? '') }}" required></div>
+                    <div><label><i class="fas fa-home" style="margin-right:4px"></i> Cell</label><input name="cell" value="{{ old('cell', $editRecord?->cell ?? '') }}" required></div>
+                    <div><label><i class="fas fa-tree" style="margin-right:4px"></i> Village</label><input name="village" value="{{ old('village', $editRecord?->village ?? '') }}" required></div>
                 @elseif($module === 'locations')
-                    <div><label>Name</label><input name="name" value="{{ old('name', $editRecord->name ?? '') }}" required></div>
-                    <div><label>Code</label><input name="code" value="{{ old('code', $editRecord->code ?? '') }}" required></div>
-                    <div><label>Country</label><input name="country" value="{{ old('country', $editRecord->country ?? 'Rwanda') }}" required></div>
-                    <div><label>Province</label><input name="province" value="{{ old('province', $editRecord->province ?? '') }}" required></div>
-                    <div><label>District</label><input name="district" value="{{ old('district', $editRecord->district ?? '') }}" required></div>
-                    <div><label>Sector</label><input name="sector" value="{{ old('sector', $editRecord->sector ?? '') }}" required></div>
-                    <div><label>Cell</label><input name="cell" value="{{ old('cell', $editRecord->cell ?? '') }}" required></div>
-                    <div><label>Village</label><input name="village" value="{{ old('village', $editRecord->village ?? '') }}" required></div>
+                    <div><label><i class="fas fa-tag" style="margin-right:4px"></i> Name</label><input name="name" value="{{ old('name', $editRecord?->name ?? '') }}" required></div>
+                    <div><label><i class="fas fa-barcode" style="margin-right:4px"></i> Code</label><input name="code" value="{{ old('code', $editRecord?->code ?? '') }}" required></div>
+                    <div><label><i class="fas fa-globe" style="margin-right:4px"></i> Country</label><input name="country" value="{{ old('country', $editRecord?->country ?? 'Rwanda') }}" required></div>
+                    <div><label><i class="fas fa-map" style="margin-right:4px"></i> Province</label><input name="province" value="{{ old('province', $editRecord?->province ?? '') }}" required></div>
+                    <div><label><i class="fas fa-city" style="margin-right:4px"></i> District</label><input name="district" value="{{ old('district', $editRecord?->district ?? '') }}" required></div>
+                    <div><label><i class="fas fa-building" style="margin-right:4px"></i> Sector</label><input name="sector" value="{{ old('sector', $editRecord?->sector ?? '') }}" required></div>
+                    <div><label><i class="fas fa-home" style="margin-right:4px"></i> Cell</label><input name="cell" value="{{ old('cell', $editRecord?->cell ?? '') }}" required></div>
+                    <div><label><i class="fas fa-tree" style="margin-right:4px"></i> Village</label><input name="village" value="{{ old('village', $editRecord?->village ?? '') }}" required></div>
                 @elseif($module === 'collections')
-                    <div><label>Farmer</label><select name="farmer_id" required>@foreach($lookups['farmers'] as $f)<option value="{{ $f->id }}" {{ old('farmer_id', $editRecord->farmer_id ?? '') == $f->id ? 'selected' : '' }}>{{ $f->name }}</option>@endforeach</select></div>
-                    <div><label>Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}" {{ old('location_id', $editRecord->location_id ?? '') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>@endforeach</select></div>
-                    <div><label>Date</label><input type="date" name="collection_date" value="{{ old('collection_date', $editRecord->collection_date?->format('Y-m-d') ?? $lookups['today']) }}" required></div>
-                    <div><label>Collected Qty</label><input type="number" step="0.001" name="quantity_collected" value="{{ old('quantity_collected', $editRecord->quantity_collected ?? '') }}" required></div>
-                    <div><label>Rejected Qty</label><input type="number" step="0.001" name="quantity_rejected" value="{{ old('quantity_rejected', $editRecord->quantity_rejected ?? '0') }}"></div>
-                    <div><label>Price per Kg</label><input type="number" step="0.01" name="price_per_kg" value="{{ old('price_per_kg', $editRecord->price_per_kg ?? '') }}" required></div>
-                    <div class="full"><label>Rejection Reason</label><input name="rejection_reason" value="{{ old('rejection_reason', $editRecord->rejection_reason ?? '') }}"></div>
+                    <div><label><i class="fas fa-tractor" style="margin-right:4px"></i> Farmer</label><select name="farmer_id" required>@foreach($lookups['farmers'] as $f)<option value="{{ $f->id }}" {{ old('farmer_id', $editRecord?->farmer_id ?? '') == $f->id ? 'selected' : '' }}>{{ $f->name }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-map-marker-alt" style="margin-right:4px"></i> Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}" {{ old('location_id', $editRecord?->location_id ?? '') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-calendar" style="margin-right:4px"></i> Date</label><input type="date" name="collection_date" value="{{ old('collection_date', $editRecord?->collection_date?->format('Y-m-d') ?? $lookups['today']) }}" required></div>
+                    <div><label><i class="fas fa-weight-hanging" style="margin-right:4px"></i> Collected Qty</label><input type="number" step="0.001" name="quantity_collected" value="{{ old('quantity_collected', $editRecord?->quantity_collected ?? '') }}" required></div>
+                    <div><label><i class="fas fa-times-circle" style="margin-right:4px"></i> Rejected Qty</label><input type="number" step="0.001" name="quantity_rejected" value="{{ old('quantity_rejected', $editRecord?->quantity_rejected ?? '0') }}"></div>
+                    <div><label><i class="fas fa-money-bill-wave" style="margin-right:4px"></i> Price per Kg</label><input type="number" step="0.01" name="price_per_kg" value="{{ old('price_per_kg', $editRecord?->price_per_kg ?? '') }}" required></div>
+                    <div class="full"><label><i class="fas fa-comment" style="margin-right:4px"></i> Rejection Reason</label><input name="rejection_reason" value="{{ old('rejection_reason', $editRecord?->rejection_reason ?? '') }}"></div>
                 @elseif($module === 'products')
-                    <div><label>Name</label><input name="name" value="{{ old('name', $editRecord->name ?? '') }}" required></div>
-                    <div><label>SKU</label><input name="sku" value="{{ old('sku', $editRecord->sku ?? '') }}" required></div>
-                    <div><label>Active</label><select name="is_active"><option value="1" {{ old('is_active', $editRecord->is_active ?? 1) == '1' ? 'selected' : '' }}>Yes</option><option value="0" {{ old('is_active', $editRecord->is_active ?? 1) == '0' ? 'selected' : '' }}>No</option></select></div>
+                    <div><label><i class="fas fa-box" style="margin-right:4px"></i> Name</label><input name="name" value="{{ old('name', $editRecord?->name ?? '') }}" required></div>
+                    <div><label><i class="fas fa-barcode" style="margin-right:4px"></i> SKU</label><input name="sku" value="{{ old('sku', $editRecord?->sku ?? '') }}" required></div>
+                    <div><label><i class="fas fa-toggle-on" style="margin-right:4px"></i> Active</label><select name="is_active"><option value="1" {{ old('is_active', $editRecord?->is_active ?? 1) == '1' ? 'selected' : '' }}>Yes</option><option value="0" {{ old('is_active', $editRecord?->is_active ?? 1) == '0' ? 'selected' : '' }}>No</option></select></div>
                 @elseif($module === 'production')
-                    <div><label>Batch Number</label><input name="batch_number" required></div>
-                    <div><label>Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}">{{ $l->name }}</option>@endforeach</select></div>
-                    <div><label>Date</label><input type="date" name="production_date" value="{{ $lookups['today'] }}" required></div>
-                    <div><label>Quality %</label><input type="number" step="0.01" name="quality_percentage" value="95" required></div>
-                    <div><label>Maize Used (kg)</label><input type="number" step="0.001" name="maize_used" required></div>
-                    <div><label>Produced Qty (kg)</label><input type="number" step="0.001" name="quantity_produced" required></div>
-                    <div><label>Wastage Qty (kg)</label><input type="number" step="0.001" name="wastage_quantity" value="0" required></div>
-                    <div><label>Product</label><select name="product_id" required>@foreach($lookups['products'] as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach</select></div>
-                    <div><label>Package</label><select name="product_package_id" required>@foreach($lookups['packages'] as $pp)<option value="{{ $pp->id }}">{{ $pp->name }}</option>@endforeach</select></div>
-                    <div class="full"><label>Wastage Reason</label><input name="wastage_reason"></div>
+                    <div><label><i class="fas fa-hashtag" style="margin-right:4px"></i> Batch Number</label><input name="batch_number" required></div>
+                    <div><label><i class="fas fa-map-marker-alt" style="margin-right:4px"></i> Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}">{{ $l->name }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-calendar" style="margin-right:4px"></i> Date</label><input type="date" name="production_date" value="{{ $lookups['today'] }}" required></div>
+                    <div><label><i class="fas fa-percentage" style="margin-right:4px"></i> Quality %</label><input type="number" step="0.01" name="quality_percentage" value="95" required></div>
+                    <div><label><i class="fas fa-weight-hanging" style="margin-right:4px"></i> Maize Used (kg)</label><input type="number" step="0.001" name="maize_used" required></div>
+                    <div><label><i class="fas fa-box-open" style="margin-right:4px"></i> Produced Qty (kg)</label><input type="number" step="0.001" name="quantity_produced" required></div>
+                    <div><label><i class="fas fa-trash" style="margin-right:4px"></i> Wastage Qty (kg)</label><input type="number" step="0.001" name="wastage_quantity" value="0" required></div>
+                    <div><label><i class="fas fa-box" style="margin-right:4px"></i> Product</label><select name="product_id" required>@foreach($lookups['products'] as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-cube" style="margin-right:4px"></i> Package</label><select name="product_package_id" required>@foreach($lookups['packages'] as $pp)<option value="{{ $pp->id }}">{{ $pp->name }}</option>@endforeach</select></div>
+                    <div class="full"><label><i class="fas fa-comment" style="margin-right:4px"></i> Wastage Reason</label><input name="wastage_reason"></div>
                 @elseif($module === 'sales')
-                    <div><label>Invoice Number</label><input name="invoice_number" required></div>
-                    <div><label>Customer Name</label><input name="customer_name" required></div>
-                    <div><label>Phone</label><input name="customer_phone"></div>
-                    <div><label>Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}">{{ $l->name }}</option>@endforeach</select></div>
-                    <div><label>Sale Date</label><input type="date" name="sale_date" value="{{ $lookups['today'] }}" required></div>
-                    <div><label>Payment Method</label><select name="payment_method"><option>cash</option><option>mobile_money</option><option>bank_transfer</option><option>credit</option></select></div>
-                    <div><label>Delivery Status</label><select name="delivery_status"><option>pending</option><option>in_transit</option><option>delivered</option></select></div>
-                    <div><label>Product</label><select name="product_id" required>@foreach($lookups['products'] as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach</select></div>
-                    <div><label>Package</label><select name="product_package_id" required>@foreach($lookups['packages'] as $pp)<option value="{{ $pp->id }}">{{ $pp->name }}</option>@endforeach</select></div>
-                    <div><label>Batch (optional)</label><select name="production_batch_id"><option value="">-</option>@foreach($lookups['batches'] as $b)<option value="{{ $b->id }}">{{ $b->batch_number }}</option>@endforeach</select></div>
-                    <div><label>Quantity</label><input type="number" step="0.001" name="quantity" required></div>
-                    <div><label>Price</label><input type="number" step="0.01" name="price" required></div>
-                    <div class="full"><label>Customer Address</label><input name="customer_address"></div>
+                    <div><label><i class="fas fa-receipt" style="margin-right:4px"></i> Invoice Number</label><input name="invoice_number" required></div>
+                    <div><label><i class="fas fa-user" style="margin-right:4px"></i> Customer Name</label><input name="customer_name" required></div>
+                    <div><label><i class="fas fa-phone" style="margin-right:4px"></i> Phone</label><input name="customer_phone"></div>
+                    <div><label><i class="fas fa-map-marker-alt" style="margin-right:4px"></i> Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}">{{ $l->name }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-calendar" style="margin-right:4px"></i> Sale Date</label><input type="date" name="sale_date" value="{{ $lookups['today'] }}" required></div>
+                    <div><label><i class="fas fa-credit-card" style="margin-right:4px"></i> Payment Method</label><select name="payment_method"><option>cash</option><option>mobile_money</option><option>bank_transfer</option><option>credit</option></select></div>
+                    <div><label><i class="fas fa-shipping-fast" style="margin-right:4px"></i> Delivery Status</label><select name="delivery_status"><option>pending</option><option>in_transit</option><option>delivered</option></select></div>
+                    <div><label><i class="fas fa-box" style="margin-right:4px"></i> Product</label><select name="product_id" required>@foreach($lookups['products'] as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-cube" style="margin-right:4px"></i> Package</label><select name="product_package_id" required>@foreach($lookups['packages'] as $pp)<option value="{{ $pp->id }}">{{ $pp->name }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-industry" style="margin-right:4px"></i> Batch (optional)</label><select name="production_batch_id"><option value="">-</option>@foreach($lookups['batches'] as $b)<option value="{{ $b->id }}">{{ $b->batch_number }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-weight-hanging" style="margin-right:4px"></i> Quantity</label><input type="number" step="0.001" name="quantity" required></div>
+                    <div><label><i class="fas fa-money-bill-wave" style="margin-right:4px"></i> Price</label><input type="number" step="0.01" name="price" required></div>
+                    <div class="full"><label><i class="fas fa-home" style="margin-right:4px"></i> Customer Address</label><input name="customer_address"></div>
                 @elseif($module === 'returns')
-                    <div><label>Sale</label><select name="sale_id" required>@foreach($lookups['sales'] as $s)<option value="{{ $s->id }}">{{ $s->invoice_number }}</option>@endforeach</select></div>
-                    <div><label>Sale Item</label><select name="sale_item_id" required>@foreach($lookups['sale_items'] as $si)<option value="{{ $si->id }}">Item #{{ $si->id }} (Qty {{ $si->quantity }})</option>@endforeach</select></div>
-                    <div><label>Quantity</label><input type="number" step="0.001" name="quantity" required></div>
-                    <div><label>Date</label><input type="date" name="return_date" value="{{ $lookups['today'] }}" required></div>
-                    <div class="full"><label>Reason</label><input name="reason" required></div>
+                    <div><label><i class="fas fa-receipt" style="margin-right:4px"></i> Sale</label><select name="sale_id" required>@foreach($lookups['sales'] as $s)<option value="{{ $s->id }}">{{ $s->invoice_number }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-shopping-cart" style="margin-right:4px"></i> Sale Item</label><select name="sale_item_id" required>@foreach($lookups['sale_items'] as $si)<option value="{{ $si->id }}">Item #{{ $si->id }} (Qty {{ $si->quantity }})</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-weight-hanging" style="margin-right:4px"></i> Quantity</label><input type="number" step="0.001" name="quantity" required></div>
+                    <div><label><i class="fas fa-calendar" style="margin-right:4px"></i> Date</label><input type="date" name="return_date" value="{{ $lookups['today'] }}" required></div>
+                    <div class="full"><label><i class="fas fa-comment" style="margin-right:4px"></i> Reason</label><input name="reason" required></div>
                 @elseif($module === 'expenses')
-                    <div><label>Batch</label><select name="production_batch_id" required>@foreach($lookups['batches'] as $b)<option value="{{ $b->id }}">{{ $b->batch_number }}</option>@endforeach</select></div>
-                    <div><label>Type</label><select name="type"><option>labor</option><option>transport</option><option>packaging</option><option>utilities</option></select></div>
-                    <div><label>Amount</label><input type="number" step="0.01" name="amount" required></div>
-                    <div class="full"><label>Description</label><input name="description"></div>
+                    <div><label><i class="fas fa-industry" style="margin-right:4px"></i> Batch</label><select name="production_batch_id" required>@foreach($lookups['batches'] as $b)<option value="{{ $b->id }}">{{ $b->batch_number }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-list" style="margin-right:4px"></i> Type</label><select name="type"><option>labor</option><option>transport</option><option>packaging</option><option>utilities</option></select></div>
+                    <div><label><i class="fas fa-money-bill-wave" style="margin-right:4px"></i> Amount</label><input type="number" step="0.01" name="amount" required></div>
+                    <div class="full"><label><i class="fas fa-align-left" style="margin-right:4px"></i> Description</label><input name="description"></div>
                 @elseif($module === 'payments')
-                    <div><label>Sale</label><select name="sale_id" required>@foreach($lookups['sales'] as $s)<option value="{{ $s->id }}">{{ $s->invoice_number }}</option>@endforeach</select></div>
-                    <div><label>Amount</label><input type="number" step="0.01" name="amount" required></div>
-                    <div><label>Method</label><select name="payment_method"><option>cash</option><option>mobile_money</option><option>bank_transfer</option><option>credit</option></select></div>
-                    <div><label>Date</label><input type="date" name="payment_date" value="{{ $lookups['today'] }}" required></div>
-                    <div class="full"><label>Reference</label><input name="reference"></div>
+                    <div><label><i class="fas fa-receipt" style="margin-right:4px"></i> Sale</label><select name="sale_id" required>@foreach($lookups['sales'] as $s)<option value="{{ $s->id }}">{{ $s->invoice_number }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-money-bill-wave" style="margin-right:4px"></i> Amount</label><input type="number" step="0.01" name="amount" required></div>
+                    <div><label><i class="fas fa-credit-card" style="margin-right:4px"></i> Method</label><select name="payment_method"><option>cash</option><option>mobile_money</option><option>bank_transfer</option><option>credit</option></select></div>
+                    <div><label><i class="fas fa-calendar" style="margin-right:4px"></i> Date</label><input type="date" name="payment_date" value="{{ $lookups['today'] }}" required></div>
+                    <div class="full"><label><i class="fas fa-barcode" style="margin-right:4px"></i> Reference</label><input name="reference"></div>
                 @else
                     <div class="full">
-                        <p class="sub">This module is ledger driven and read-only in web view.</p>
+                        <p class="sub"><i class="fas fa-lock"></i> This module is ledger driven and read-only in web view.</p>
                     </div>
                 @endif
 
                 @if($canCreate)
                     <div class="full actions">
-                        <button class="primary" type="submit">{{ $editRecord ? 'Update Record' : 'Save Record' }}</button>
-                        @if($editRecord)<a href="{{ route('modules.show', ['module' => $module]) }}" class="secondary" style="text-decoration:none;padding:0.5rem 1rem;">Cancel</a>@else<button class="secondary" id="cancel-form-btn" type="button">Cancel</button>@endif
+                        <button class="primary" type="submit"><i class="fas {{ $editRecord ? 'fa-save' : 'fa-check' }}"></i> {{ $editRecord ? 'Update Record' : 'Save Record' }}</button>
+                        @if($editRecord)<a href="{{ route('modules.show', ['module' => $module]) }}" class="secondary" style="text-decoration:none;"><i class="fas fa-times"></i> Cancel</a>@else<button class="secondary" id="cancel-form-btn" type="button"><i class="fas fa-times"></i> Cancel</button>@endif
                     </div>
                 @endif
             </form>
@@ -185,51 +202,163 @@
         </section>
 
         <section class="card">
-            <h3 style="margin-top:0;">Recent records</h3>
+            <h3 style="margin-top:0;"><i class="fas fa-list-alt" style="margin-right:8px;color:var(--brand-green-dark)"></i>Recent records</h3>
             <table>
                 <thead>
+                @if($module === 'collections')
                 <tr>
-                    <th>ID</th>
-                    <th>Summary</th>
-                    <th>Date</th>
-                    @if(in_array($module, ['farmers','locations','collections','products']))
-                        <th>Actions</th>
-                    @endif
+                    <th>Farmer</th>
+                    <th>Location</th>
+                    <th>Collection Date</th>
+                    <th>Collected (kg)</th>
+                    <th>Accepted (kg)</th>
+                    <th>Rejected (kg)</th>
+                    <th>Price / kg</th>
+                    <th>Actions</th>
                 </tr>
+                @elseif($module === 'farmers')
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>District</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+                @elseif($module === 'locations')
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>District</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+                @elseif($module === 'products')
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+                @elseif($module === 'finished-inventory')
+                <tr>
+                    <th>Product</th>
+                    <th>Quality</th>
+                    <th>Stock</th>
+                    <th>Location</th>
+                    <th>Production Date</th>
+                    <th>Expiry Date</th>
+                    <th>Unit Cost</th>
+                    <th>Suggested Price</th>
+                    <th>Total Value</th>
+                </tr>
+                @else
+                <tr>
+                    <th>Info</th>
+                    <th>Date</th>
+                </tr>
+                @endif
                 </thead>
                 <tbody>
                 @forelse($records as $record)
+                    @if($module === 'collections')
                     <tr>
-                        <td>{{ $record->id }}</td>
+                        <td><i class="fas fa-tractor" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ optional($record->farmer)->name ?? '-' }}</td>
+                        <td><i class="fas fa-map-marker-alt" style="margin-right:4px;color:var(--muted)"></i> {{ optional($record->location)->name ?? '-' }}</td>
+                        <td>{{ $record->collection_date?->format('Y-m-d') ?? '-' }}</td>
+                        <td>{{ number_format($record->quantity_collected, 3) }}</td>
+                        <td>{{ number_format($record->accepted_quantity, 3) }}</td>
+                        <td>{{ number_format($record->quantity_rejected, 3) }}</td>
+                        <td>{{ number_format($record->price_per_kg, 2) }}</td>
+                        <td class="actions">
+                            <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;"><i class="fas fa-pen"></i> Edit</a>
+                            <form method="POST" action="{{ route('modules.destroy', ['module' => $module, 'id' => $record->id]) }}" onsubmit="return confirm('Delete this record?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    @elseif($module === 'farmers')
+                    <tr>
+                        <td><i class="fas fa-user" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->name }}</td>
+                        <td><i class="fas fa-phone" style="margin-right:4px;color:var(--muted)"></i> {{ $record->phone }}</td>
+                        <td>{{ $record->district }}</td>
+                        <td>{{ $record->created_at?->format('Y-m-d') ?? '-' }}</td>
+                        <td class="actions">
+                            <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;"><i class="fas fa-pen"></i> Edit</a>
+                            <form method="POST" action="{{ route('modules.destroy', ['module' => $module, 'id' => $record->id]) }}" onsubmit="return confirm('Delete this record?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    @elseif($module === 'locations')
+                    <tr>
+                        <td><i class="fas fa-map-marker-alt" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->name }}</td>
+                        <td><span class="badge badge-muted">{{ $record->code }}</span></td>
+                        <td>{{ $record->district }}</td>
+                        <td>{{ $record->created_at?->format('Y-m-d') ?? '-' }}</td>
+                        <td class="actions">
+                            <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;"><i class="fas fa-pen"></i> Edit</a>
+                            <form method="POST" action="{{ route('modules.destroy', ['module' => $module, 'id' => $record->id]) }}" onsubmit="return confirm('Delete this record?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    @elseif($module === 'products')
+                    <tr>
+                        <td><i class="fas fa-box" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->name }}</td>
+                        <td>{{ $record->sku }}</td>
+                        <td><span class="badge {{ $record->is_active ? 'badge-success' : 'badge-muted' }}"><i class="fas {{ $record->is_active ? 'fa-check' : 'fa-times' }}"></i> {{ $record->is_active ? 'Active' : 'Inactive' }}</span></td>
+                        <td>{{ $record->created_at?->format('Y-m-d') ?? '-' }}</td>
+                        <td class="actions">
+                            <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;"><i class="fas fa-pen"></i> Edit</a>
+                            <form method="POST" action="{{ route('modules.destroy', ['module' => $module, 'id' => $record->id]) }}" onsubmit="return confirm('Delete this record?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    @elseif($module === 'finished-inventory')
+                    <tr>
+                        <td><i class="fas fa-box" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ optional($record->product)->name ?? '-' }}</td>
+                        <td>{{ $record->quality ?? '-' }}</td>
+                        <td><strong>{{ number_format($record->stock ?? 0, 3) }}</strong> kg</td>
+                        <td><i class="fas fa-warehouse" style="margin-right:4px;color:var(--muted)"></i> {{ optional($record->location)->name ?? '-' }}</td>
+                        <td>{{ $record->production_date instanceof \Carbon\Carbon ? $record->production_date->format('Y-m-d') : ($record->production_date ?? '-') }}</td>
+                        <td>{{ $record->expiry_date instanceof \Carbon\Carbon ? $record->expiry_date->format('Y-m-d') : ($record->expiry_date ?? '-') }}</td>
+                        <td>{{ number_format($record->unit_cost ?? 0, 2) }} RWF</td>
+                        <td>{{ number_format($record->suggested_price ?? 0, 2) }} RWF</td>
+                        <td><strong>{{ number_format($record->total_value ?? 0, 2) }}</strong> RWF</td>
+                    </tr>
+                    @else
+                    <tr>
                         <td>
                             @switch($module)
-                                @case('farmers') {{ $record->name }} ({{ $record->phone }}) @break
-                                @case('locations') {{ $record->name }} - {{ $record->code }} @break
-                                @case('collections') Farmer: {{ optional($record->farmer)->name }} / Location: {{ optional($record->location)->name }} / Collected: {{ $record->quantity_collected }} / Accepted: {{ $record->accepted_quantity }} / Price: {{ $record->price_per_kg }} @break
-                                @case('raw-inventory') {{ $record->type }} - {{ $record->quantity }} ({{ $record->source }}) @break
-                                @case('production') {{ $record->batch_number }} / Produced: {{ $record->quantity_produced }} @break
-                                @case('products') {{ $record->name }} ({{ $record->sku }}) @break
-                                @case('finished-inventory') {{ $record->type }} - {{ $record->quantity }} @break
-                                @case('sales') {{ $record->invoice_number }} / {{ $record->customer_name }} / {{ $record->total_amount }} @break
-                                @case('returns') Sale #{{ $record->sale_id }} / Qty {{ $record->quantity }} @break
-                                @case('expenses') {{ $record->type }} / {{ $record->amount }} @break
-                                @case('payments') Sale #{{ $record->sale_id }} / {{ $record->amount }} @break
+                                @case('raw-inventory') <i class="fas fa-exchange-alt" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->type }} — {{ number_format($record->quantity, 3) }} kg ({{ $record->source }}) @break
+                                @case('production') <i class="fas fa-industry" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->batch_number }} — Produced {{ number_format($record->quantity_produced, 3) }} kg @break
+                                @case('sales') <i class="fas fa-receipt" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->invoice_number }} — {{ $record->customer_name }} — {{ number_format($record->total_amount, 2) }} RWF @break
+                                @case('returns') <i class="fas fa-undo" style="margin-right:4px;color:var(--brand-orange)"></i> {{ optional($record->sale)->invoice_number ?? 'Sale #' . $record->sale_id }} — Qty {{ number_format($record->quantity, 3) }} @break
+                                @case('expenses') <i class="fas fa-file-invoice-dollar" style="margin-right:4px;color:var(--brand-orange)"></i> {{ ucfirst($record->type) }} — {{ number_format($record->amount, 2) }} RWF @break
+                                @case('payments') <i class="fas fa-money-check-alt" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ optional($record->sale)->invoice_number ?? 'Sale #' . $record->sale_id }} — {{ number_format($record->amount, 2) }} RWF @break
                             @endswitch
                         </td>
                         <td>{{ $record->created_at?->format('Y-m-d H:i') ?? '-' }}</td>
-                        @if(in_array($module, ['farmers','locations','collections','products']))
-                            <td class="actions">
-                                <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;padding:0.35rem 0.75rem;">Edit</a>
-                                <form method="POST" action="{{ route('modules.destroy', ['module' => $module, 'id' => $record->id]) }}" onsubmit="return confirm('Delete this record?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="danger">Delete</button>
-                                </form>
-                            </td>
-                        @endif
                     </tr>
+                    @endif
                 @empty
-                    <tr><td colspan="{{ in_array($module, ['farmers','locations','collections','products']) ? '4' : '3' }}">No records yet.</td></tr>
+                    @if($module === 'finished-inventory')
+                        <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;"><i class="fas fa-box-open" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--line)"></i>No stock records yet.</td></tr>
+                    @elseif(in_array($module, ['farmers','locations','collections','products']))
+                        <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;"><i class="fas fa-folder-open" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--line)"></i>No records yet.</td></tr>
+                    @else
+                        <tr><td colspan="2" style="text-align:center;color:var(--muted);padding:24px;"><i class="fas fa-folder-open" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--line)"></i>No records yet.</td></tr>
+                    @endif
                 @endforelse
                 </tbody>
             </table>

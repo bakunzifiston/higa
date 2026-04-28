@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/modules/{module}', [ModuleController::class, 'show'])->name('modules.show');
+    Route::get('/modules/{module}/{id}/edit', [ModuleController::class, 'edit'])->name('modules.edit');
     Route::post('/modules/{module}', [ModuleController::class, 'store'])->name('modules.store');
     Route::put('/modules/{module}/{id}', [ModuleController::class, 'update'])->name('modules.update');
     Route::delete('/modules/{module}/{id}', [ModuleController::class, 'destroy'])->name('modules.destroy');

@@ -11,10 +11,10 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::query()->updateOrCreate(
-            ['email' => 'admin@hoga-ims.com'],
+            ['email' => 'admin@higaagri.co.zm'],
             [
-                'name' => 'Hoga Admin',
-                'password' => Hash::make('Hoga@12345'),
+                'name' => 'Higa AgriBusiness Admin',
+                'password' => Hash::make('Higa@2026'),
             ]
         );
     }

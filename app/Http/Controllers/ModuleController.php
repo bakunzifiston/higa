@@ -278,13 +278,44 @@ class ModuleController extends Controller
             'raw-inventory' => RawInventoryMovement::query()->latest('movement_date')->paginate(20),
             'production' => ProductionBatch::query()->with(['outputs'])->latest('production_date')->paginate(15),
             'products' => Product::query()->latest()->paginate(15),
-            'finished-inventory' => FinishedInventoryMovement::query()->latest('movement_date')->paginate(20),
+            'finished-inventory' => $this->finishedInventoryStock(),
             'sales' => Sale::query()->with('items')->latest('sale_date')->paginate(15),
             'returns' => SaleReturn::query()->with(['sale', 'saleItem'])->latest('return_date')->paginate(15),
             'expenses' => BatchExpense::query()->with('batch')->latest()->paginate(20),
             'payments' => Payment::query()->with('sale')->latest('payment_date')->paginate(20),
             default => collect(),
         };
+    }
+
+    private function finishedInventoryStock(): mixed
+    {
+        $stocks = FinishedInventoryMovement::query()
+            ->selectRaw('
+                product_id,
+                location_id,
+                SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) - SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) as available_stock,
+                MAX(movement_date) as production_date,
+                MAX(expiry_date) as expiry_date
+            ', [FinishedInventoryMovement::TYPE_IN, FinishedInventoryMovement::TYPE_OUT])
+            ->groupBy('product_id', 'location_id')
+            ->havingRaw('SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) - SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) > 0', [FinishedInventoryMovement::TYPE_IN, FinishedInventoryMovement::TYPE_OUT])
+            ->with(['product', 'location'])
+            ->orderByDesc('production_date')
+            ->paginate(20);
+
+        $stocks->getCollection()->transform(function ($item) {
+            $item->id = "{$item->product_id}-{$item->location_id}";
+            $item->stock = $item->available_stock;
+            $item->quality = optional($item->product)->quality_percentage ?? '-';
+            $item->unit_cost = optional($item->product)->cost_price ?? 0;
+            $item->suggested_price = optional($item->product)->selling_price ?? 0;
+            $item->total_value = ($item->unit_cost ?? 0) * (float) $item->stock;
+            $item->production_date = $item->production_date ? \Carbon\Carbon::parse($item->production_date) : null;
+            $item->expiry_date = $item->expiry_date ? \Carbon\Carbon::parse($item->expiry_date) : null;
+            return $item;
+        });
+
+        return $stocks;
     }
 
     private function lookupData(): array
