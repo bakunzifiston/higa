@@ -132,7 +132,8 @@
                     <div><label><i class="fas fa-home" style="margin-right:4px"></i> Cell</label><input name="cell" value="{{ old('cell', $editRecord?->cell ?? '') }}" required></div>
                     <div><label><i class="fas fa-tree" style="margin-right:4px"></i> Village</label><input name="village" value="{{ old('village', $editRecord?->village ?? '') }}" required></div>
                 @elseif($module === 'collections')
-                    <div><label><i class="fas fa-tractor" style="margin-right:4px"></i> Farmer</label><select name="farmer_id" required>@foreach($lookups['farmers'] as $f)<option value="{{ $f->id }}" {{ old('farmer_id', $editRecord?->farmer_id ?? '') == $f->id ? 'selected' : '' }}>{{ $f->name }}</option>@endforeach</select></div>
+<div><label><i class="fas fa-tractor" style="margin-right:4px"></i> Farmer</label><select name="farmer_id" required>@foreach($lookups['farmers'] as $f)<option value="{{ $f->id }}" {{ old('farmer_id', $editRecord?->farmer_id ?? '') == $f->id ? 'selected' : '' }}>{{ $f->name }}</option>@endforeach</select></div>
+                    <div><label><i class="fas fa-seedling" style="margin-right:4px"></i> Item Name</label><input name="product_name" value="{{ old('product_name', $editRecord?->product_name ?? '') }}"></div>
                     <div><label><i class="fas fa-map-marker-alt" style="margin-right:4px"></i> Location</label><select name="location_id" required>@foreach($lookups['locations'] as $l)<option value="{{ $l->id }}" {{ old('location_id', $editRecord?->location_id ?? '') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>@endforeach</select></div>
                     <div><label><i class="fas fa-calendar" style="margin-right:4px"></i> Date</label><input type="date" name="collection_date" value="{{ old('collection_date', $editRecord?->collection_date?->format('Y-m-d') ?? $lookups['today']) }}" required></div>
                     <div><label><i class="fas fa-weight-hanging" style="margin-right:4px"></i> Collected Qty</label><input type="number" step="0.001" name="quantity_collected" value="{{ old('quantity_collected', $editRecord?->quantity_collected ?? '') }}" required></div>
@@ -205,9 +206,10 @@
             <h3 style="margin-top:0;"><i class="fas fa-list-alt" style="margin-right:8px;color:var(--brand-green-dark)"></i>Recent records</h3>
             <table>
                 <thead>
-                @if($module === 'collections')
+@if($module === 'collections')
                 <tr>
                     <th>Farmer</th>
+                    <th>Item Name</th>
                     <th>Location</th>
                     <th>Collection Date</th>
                     <th>Collected (kg)</th>
@@ -292,9 +294,10 @@
                 </thead>
                 <tbody>
                 @forelse($records as $record)
-                    @if($module === 'collections')
+@if($module === 'collections')
                     <tr>
                         <td><i class="fas fa-tractor" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ optional($record->farmer)->name ?? '-' }}</td>
+                        <td>{{ $record->product_name ?? 'Maize' }}</td>
                         <td><i class="fas fa-map-marker-alt" style="margin-right:4px;color:var(--muted)"></i> {{ optional($record->location)->name ?? '-' }}</td>
                         <td>{{ $record->collection_date?->format('Y-m-d') ?? '-' }}</td>
                         <td>{{ number_format($record->quantity_collected, 3) }}</td>
