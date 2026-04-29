@@ -216,14 +216,21 @@
                     <th>Price / kg</th>
                     <th>Actions</th>
                 </tr>
+
                 @elseif($module === 'farmers')
                 <tr>
                     <th>Name</th>
                     <th>Phone</th>
+                    <th>Country</th>
+                    <th>Province</th>
                     <th>District</th>
+                    <th>Sector</th>
+                    <th>Cell</th>
+                    <th>Village</th>
                     <th>Created</th>
                     <th>Actions</th>
                 </tr>
+
                 @elseif($module === 'locations')
                 <tr>
                     <th>Name</th>
@@ -240,6 +247,7 @@
                     <th>Created</th>
                     <th>Actions</th>
                 </tr>
+
                 @elseif($module === 'finished-inventory')
                 <tr>
                     <th>Product</th>
@@ -252,12 +260,29 @@
                     <th>Suggested Price</th>
                     <th>Total Value</th>
                 </tr>
+                @elseif($module === 'sales')
+                <tr>
+                    <th>Invoice</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Product</th>
+                    <th>Package</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Address</th>
+                    <th>Returns</th>
+                </tr>
                 @else
                 <tr>
                     <th>Info</th>
                     <th>Date</th>
                 </tr>
                 @endif
+
                 </thead>
                 <tbody>
                 @forelse($records as $record)
@@ -279,11 +304,17 @@
                             </form>
                         </td>
                     </tr>
+
                     @elseif($module === 'farmers')
                     <tr>
                         <td><i class="fas fa-user" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->name }}</td>
-                        <td><i class="fas fa-phone" style="margin-right:4px;color:var(--muted)"></i> {{ $record->phone }}</td>
+                        <td>{{ $record->phone }}</td>
+                        <td>{{ $record->country }}</td>
+                        <td>{{ $record->province }}</td>
                         <td>{{ $record->district }}</td>
+                        <td>{{ $record->sector }}</td>
+                        <td>{{ $record->cell }}</td>
+                        <td>{{ $record->village }}</td>
                         <td>{{ $record->created_at?->format('Y-m-d') ?? '-' }}</td>
                         <td class="actions">
                             <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;"><i class="fas fa-pen"></i> Edit</a>
@@ -294,6 +325,7 @@
                             </form>
                         </td>
                     </tr>
+
                     @elseif($module === 'locations')
                     <tr>
                         <td><i class="fas fa-map-marker-alt" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->name }}</td>
@@ -336,6 +368,30 @@
                         <td>{{ number_format($record->suggested_price ?? 0, 2) }} RWF</td>
                         <td><strong>{{ number_format($record->total_value ?? 0, 2) }}</strong> RWF</td>
                     </tr>
+
+                    @elseif($module === 'sales')
+                    <tr>
+                        <td><strong>{{ $record->invoice_number }}</strong></td>
+                        <td>{{ $record->customer_name }}</td>
+                        <td>{{ $record->customer_phone }}</td>
+                        <td>{{ optional($record->location)->name ?? '-' }}</td>
+                        <td>{{ $record->sale_date?->format('d/m/Y') }}</td>
+                        <td><span class="badge {{ $record->payment_method === 'cash' ? 'badge-success' : ($record->payment_method === 'mobile_money' ? 'badge-primary' : 'badge-secondary') }}">{{ ucfirst(str_replace('_', ' ', $record->payment_method)) }}</span></td>
+                        <td><span class="badge {{ $record->delivery_status === 'delivered' ? 'badge-success' : ($record->delivery_status === 'in_transit' ? 'badge-primary' : 'badge-warning') }}">{{ ucfirst(str_replace('_', ' ', $record->delivery_status)) }}</span></td>
+                        <td>{{ optional($record->items->first()->product)->name ?? '-' }}</td>
+                        <td>{{ optional($record->items->first()->product_package)->name ?? '-' }}</td>
+                        <td>{{ number_format($record->items->first()->quantity ?? 0, 3) }}</td>
+                        <td>{{ number_format($record->items->first()->price ?? 0, 2) }}</td>
+                        <td>{{ Str::limit($record->customer_address ?? '', 30) }}</td>
+                        <td>
+                            @php $returnCount = $record->returns->count(); @endphp
+                            @if($returnCount > 0)
+                                <span class="badge badge-danger">{{ $returnCount }}</span>
+                            @else
+                                —
+                            @endif
+                        </td>
+                    </tr>
                     @else
                     <tr>
                         <td>
@@ -351,6 +407,7 @@
                         <td>{{ $record->created_at?->format('Y-m-d H:i') ?? '-' }}</td>
                     </tr>
                     @endif
+
                 @empty
                     @if($module === 'finished-inventory')
                         <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;"><i class="fas fa-box-open" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--line)"></i>No stock records yet.</td></tr>
