@@ -111,9 +111,10 @@ class ModuleController extends Controller
                     'village' => ['required', 'string', 'max:120'],
                     'is_active' => ['nullable', 'boolean'],
                 ])),
-                'collections' => $this->maizeCollectionService->record($request->validate([
+'collections' => $this->maizeCollectionService->record($request->validate([
                     'farmer_id' => ['required', 'integer', 'exists:farmers,id'],
                     'location_id' => ['required', 'integer', 'exists:locations,id'],
+                    'product_name' => ['nullable', 'string', 'max:255'],
                     'collection_date' => ['required', 'date'],
                     'quantity_collected' => ['required', 'numeric', 'gt:0'],
                     'quantity_rejected' => ['nullable', 'numeric', 'gte:0'],
@@ -276,7 +277,7 @@ class ModuleController extends Controller
             'farmers' => Farmer::query()->latest()->paginate(15),
             'locations' => Location::query()->latest()->paginate(15),
             'collections' => MaizeCollection::query()->with(['farmer', 'location'])->latest('collection_date')->paginate(15),
-            'raw-inventory' => RawInventoryMovement::query()->latest('movement_date')->paginate(20),
+'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection', 'productionBatch'])->latest('movement_date')->paginate(20),
             'production' => ProductionBatch::query()->with(['outputs'])->latest('production_date')->paginate(15),
             'products' => Product::query()->latest()->paginate(15),
             'finished-inventory' => $this->finishedInventoryStock(),

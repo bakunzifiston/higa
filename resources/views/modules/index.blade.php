@@ -268,6 +268,15 @@
                     <th>Suggested Price</th>
                     <th>Total Value</th>
                 </tr>
+@elseif($module === 'raw-inventory')
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Source</th>
+                    <th>Quantity</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                </tr>
                 @elseif($module === 'sales')
                 <tr>
                     <th>Invoice</th>
@@ -371,6 +380,22 @@
                                 <button type="submit" class="danger"><i class="fas fa-trash"></i></button>
                             </form>
                         </td>
+                    </tr>
+@elseif($module === 'raw-inventory')
+                    <tr>
+                        <td>{{ $record->collection?->product_name ?? 'Raw Material' }}</td>
+                        <td><span class="badge {{ $record->type === 'IN' ? 'badge-success' : 'badge-warning' }}">{{ $record->type }}</span></td>
+                        <td>
+                            @if($record->source === 'collection')
+                                <i class="fas fa-seedling" title="Collection" style="color:var(--brand-green-dark)"></i>
+                            @elseif($record->source === 'production')
+                                <i class="fas fa-industry" title="Production" style="color:var(--brand-blue)"></i>
+                            @endif
+                            {{ ucfirst($record->source) }}
+                        </td>
+                        <td><strong>{{ number_format($record->quantity, 3) }} kg</strong></td>
+                        <td>{{ $record->location?->name ?? '-' }}</td>
+                        <td>{{ $record->movement_date?->format('Y-m-d H:i') ?? '-' }}</td>
                     </tr>
                     @elseif($module === 'finished-inventory')
                     <tr>
