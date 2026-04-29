@@ -278,7 +278,10 @@ class ModuleController extends Controller
             'locations' => Location::query()->latest()->paginate(15),
             'collections' => MaizeCollection::query()->with(['farmer', 'location'])->latest('collection_date')->paginate(15),
 'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection', 'productionBatch'])->latest('movement_date')->paginate(20),
-            'production' => ProductionBatch::query()->with(['outputs'])->latest('production_date')->paginate(15),
+        'production' => ProductionBatch::query()
+            ->with(['location', 'outputs.product', 'outputs.package', 'expenses', 'wastage'])
+            ->latest('production_date')
+            ->paginate(15),
             'products' => Product::query()->latest()->paginate(15),
             'finished-inventory' => $this->finishedInventoryStock(),
             'sales' => Sale::query()->with('items')->latest('sale_date')->paginate(15),

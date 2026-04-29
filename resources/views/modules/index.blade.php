@@ -277,6 +277,19 @@
                     <th>Location</th>
                     <th>Date</th>
                 </tr>
+                @elseif($module === 'production')
+                <tr>
+                    <th>Batch #</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Maize Used</th>
+                    <th>Produced</th>
+                    <th>Wastage</th>
+                    <th>Quality</th>
+                    <th>Outputs</th>
+                    <th> Expenses Total</th>
+                    <th>Notes</th>
+                </tr>
                 @elseif($module === 'sales')
                 <tr>
                     <th>Invoice</th>
@@ -397,6 +410,45 @@
                         <td>{{ $record->location?->name ?? '-' }}</td>
                         <td>{{ $record->movement_date?->format('Y-m-d H:i') ?? '-' }}</td>
                     </tr>
+                    @elseif($module === 'production')
+                    <tr>
+                        <td><strong>{{ $record->batch_number }}</strong></td>
+                        <td>{{ $record->location?->name ?? '-' }}</td>
+                        <td>{{ $record->production_date?->format('Y-m-d') }}</td>
+                        <td>{{ number_format($record->maize_used, 3) }} kg</td>
+                        <td><strong>{{ number_format($record->quantity_produced, 3) }} kg</strong></td>
+                        <td style="color:var(--danger);">
+                            {{ number_format($record->wastage_quantity, 3) }} kg
+                            @if($record->wastage->isNotEmpty())
+                                <br><span class="sub">
+                                    @foreach($record->wastage as $w)
+                                        {{ number_format($w->quantity, 3) }} kg {{ $w->reason ?: 'No reason' }}@if(!$loop->last), @endif
+                                    @endforeach
+                                </span>
+                            @elseif($record->wastage_reason)
+                                <br><span class="sub" title="{{ $record->wastage_reason }}">{{ Str::limit($record->wastage_reason, 30) }}</span>
+                            @endif
+                        </td>
+                        <td><span class="badge badge-primary">{{ $record->quality_percentage }}%</span></td>
+                        <td>
+                            @foreach($record->outputs as $output)
+                                <div>{{ $output->product?->name ?? 'Product' }} ({{ $output->package?->name ?? 'N/A' }}): <strong>{{ number_format($output->quantity, 3) }} kg</strong></div>
+                            @endforeach
+                        </td>
+                        <td>
+                            @php $totalExpenses = $record->expenses->sum('amount'); @endphp
+                            <strong>{{ number_format($totalExpenses, 2) }} RWF</strong>
+                            @if($record->expenses->count() > 0)
+                                <br><span class="sub">{{ $record->expenses->count() }} expense(s)</span>
+                            @endif
+                        </td>
+                        <td>
+                            {{ Str::limit($record->notes ?? '-', 50) }}
+                            @if(($record->notes ?: '') && strlen($record->notes) > 50)
+                                <span class="sub" title="{{ $record->notes }}">...</span>
+                            @endif
+                        </td>
+                    </tr>
                     @elseif($module === 'finished-inventory')
                     <tr>
                         <td><i class="fas fa-box" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ optional($record->product)->name ?? '-' }}</td>
@@ -452,6 +504,8 @@
                 @empty
                     @if($module === 'finished-inventory')
                         <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;"><i class="fas fa-box-open" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--line)"></i>No stock records yet.</td></tr>
+                    @elseif($module === 'production')
+                        <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px;"><i class="fas fa-industry" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--line)"></i>No production batches yet.</td></tr>
                     @elseif(in_array($module, ['farmers','locations','collections','products']))
                         <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;"><i class="fas fa-folder-open" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--line)"></i>No records yet.</td></tr>
                     @else
