@@ -27,6 +27,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -334,14 +335,16 @@ class ModuleController extends Controller
 
     private function dashboardData(string $activeModule): array
     {
-        $stats = [
-            'farmers' => Farmer::query()->count(),
-            'locations' => Location::query()->count(),
-            'collections' => MaizeCollection::query()->count(),
-            'products' => Product::query()->count(),
-            'production_batches' => ProductionBatch::query()->count(),
-            'sales' => Sale::query()->count(),
-        ];
+        $counts = DB::select("
+            SELECT
+                (SELECT COUNT(*) FROM farmers) as farmers,
+                (SELECT COUNT(*) FROM locations) as locations,
+                (SELECT COUNT(*) FROM maize_collections) as collections,
+                (SELECT COUNT(*) FROM products) as products,
+                (SELECT COUNT(*) FROM production_batches) as production_batches,
+                (SELECT COUNT(*) FROM sales) as sales
+        ");
+        $stats = (array) $counts[0];
 
         $menuItems = ImsMenu::moduleNav();
 

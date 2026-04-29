@@ -51,7 +51,7 @@
         <div class="topbar-ims">
             <div class="topbar-ims-title">
                 <i class="fas fa-layer-group"></i>
-                {{ ucfirst(str_replace('-', ' ', $module)) }}
+                {{ $module === 'locations' ? 'Warehouses' : ucfirst(str_replace('-', ' ', $module)) }}
             </div>
             <div class="topbar-account">
                 <a href="{{ route('profile.edit') }}" class="topbar-link">
@@ -68,7 +68,7 @@
         <section class="card">
             <h1 class="title">
                 <i class="fas fa-database"></i>
-                {{ str_replace('-', ' ', $module) }} records
+                {{ $module === 'locations' ? 'Warehouse' : str_replace('-', ' ', $module) }} records
             </h1>
             <p class="sub">Create and manage module records from the web interface.</p>
         </section>
@@ -95,7 +95,7 @@
             @endif
 
             <div class="form-toolbar">
-                <h3 style="margin:0;"><i class="fas {{ $editRecord ? 'fa-pen' : 'fa-plus-circle' }}" style="margin-right:6px;color:var(--brand-green-dark)"></i>{{ $editRecord ? 'Edit #' . $editRecord->id : str_replace('-', ' ', $module) . ' form' }}</h3>
+{{ $editRecord ? 'Edit #' . $editRecord->id : ($module === 'locations' ? 'Warehouse' : str_replace('-', ' ', $module)) . ' form' }}</h3>
                 @if($canCreate)
                     <button type="button" class="primary" id="show-form-btn"><i class="fas fa-plus"></i> Add Record</button>
                 @else
@@ -106,7 +106,7 @@
             <div id="module-form-modal" class="modal-overlay {{ $showForm ? 'is-open' : '' }}">
             <div class="modal-card" role="dialog" aria-modal="true" aria-label="Add record form">
             <div class="modal-header">
-                <h3><i class="fas {{ $editRecord ? 'fa-pen' : 'fa-plus' }}" style="margin-right:6px;color:var(--brand-green-dark)"></i>{{ $editRecord ? 'Edit' : 'Add' }} {{ str_replace('-', ' ', $module) }} record</h3>
+<h3><i class="fas {{ $editRecord ? 'fa-pen' : 'fa-plus' }}" style="margin-right:6px;color:var(--brand-green-dark)"></i>{{ $editRecord ? 'Edit' : 'Add' }} {{ $module === 'locations' ? 'Warehouse' : str_replace('-', ' ', $module) }} record</h3>
                 <button class="icon-close" id="close-form-btn" type="button" aria-label="Close"><i class="fas fa-times"></i></button>
             </div>
             <form method="POST" action="{{ $editRecord ? route('modules.update', ['module' => $module, 'id' => $editRecord->id]) : route('modules.store', ['module' => $module]) }}" class="form-grid">
@@ -231,14 +231,20 @@
                     <th>Actions</th>
                 </tr>
 
-                @elseif($module === 'locations')
+@elseif($module === 'locations')
                 <tr>
-                    <th>Name</th>
+                    <th>Warehouse</th>
                     <th>Code</th>
+                    <th>Country</th>
+                    <th>Province</th>
                     <th>District</th>
+                    <th>Sector</th>
+                    <th>Cell</th>
+                    <th>Village</th>
                     <th>Created</th>
                     <th>Actions</th>
                 </tr>
+
                 @elseif($module === 'products')
                 <tr>
                     <th>Name</th>
@@ -326,11 +332,17 @@
                         </td>
                     </tr>
 
+
                     @elseif($module === 'locations')
                     <tr>
-                        <td><i class="fas fa-map-marker-alt" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->name }}</td>
+                        <td><i class="fas fa-warehouse" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->name }}</td>
                         <td><span class="badge badge-muted">{{ $record->code }}</span></td>
+                        <td>{{ $record->country }}</td>
+                        <td>{{ $record->province }}</td>
                         <td>{{ $record->district }}</td>
+                        <td>{{ $record->sector }}</td>
+                        <td>{{ $record->cell }}</td>
+                        <td>{{ $record->village }}</td>
                         <td>{{ $record->created_at?->format('Y-m-d') ?? '-' }}</td>
                         <td class="actions">
                             <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;"><i class="fas fa-pen"></i> Edit</a>
@@ -341,6 +353,7 @@
                             </form>
                         </td>
                     </tr>
+
                     @elseif($module === 'products')
                     <tr>
                         <td><i class="fas fa-box" style="margin-right:4px;color:var(--brand-green-dark)"></i> {{ $record->name }}</td>

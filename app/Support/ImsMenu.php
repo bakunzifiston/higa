@@ -12,7 +12,7 @@ class ImsMenu
         return [
             ['slug' => 'dashboard', 'label' => 'Dashboard', 'href' => route('dashboard'), 'icon' => 'fa-solid fa-chart-line'],
             ['slug' => 'farmers', 'label' => 'Farmers', 'href' => route('modules.show', ['module' => 'farmers']), 'icon' => 'fa-solid fa-tractor'],
-            ['slug' => 'locations', 'label' => 'Locations', 'href' => route('modules.show', ['module' => 'locations']), 'icon' => 'fa-solid fa-location-dot'],
+['slug' => 'warehouses', 'label' => 'Warehouses', 'href' => route('modules.show', ['module' => 'locations']), 'icon' => 'fa-solid fa-warehouse'],
             ['slug' => 'collections', 'label' => 'Collections', 'href' => route('modules.show', ['module' => 'collections']), 'icon' => 'fa-solid fa-wheat-awn'],
             ['slug' => 'raw-inventory', 'label' => 'Raw Inventory', 'href' => route('modules.show', ['module' => 'raw-inventory']), 'icon' => 'fa-solid fa-boxes-stacked'],
             ['slug' => 'production', 'label' => 'Production', 'href' => route('modules.show', ['module' => 'production']), 'icon' => 'fa-solid fa-industry'],

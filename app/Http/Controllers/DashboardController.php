@@ -14,6 +14,7 @@ use App\Domain\Sales\Models\Sale;
 use App\Domain\Sales\Models\SaleReturn;
 use App\Domain\Suppliers\Models\Farmer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Throwable;
@@ -27,6 +28,8 @@ class DashboardController extends Controller
 
     public function __invoke(Request $request): View
     {
+        set_time_limit(60);
+
         $dbError = null;
         $stats = [];
         $kpis = [];
@@ -35,14 +38,16 @@ class DashboardController extends Controller
         $recentSales = collect();
 
         try {
-            $stats = [
-                'farmers' => Farmer::query()->count(),
-                'locations' => Location::query()->count(),
-                'collections' => MaizeCollection::query()->count(),
-                'products' => Product::query()->count(),
-                'production_batches' => ProductionBatch::query()->count(),
-                'sales' => Sale::query()->count(),
-            ];
+            $counts = DB::select("
+                SELECT
+                    (SELECT COUNT(*) FROM farmers) as farmers,
+                    (SELECT COUNT(*) FROM locations) as locations,
+                    (SELECT COUNT(*) FROM maize_collections) as collections,
+                    (SELECT COUNT(*) FROM products) as products,
+                    (SELECT COUNT(*) FROM production_batches) as production_batches,
+                    (SELECT COUNT(*) FROM sales) as sales
+            ");
+            $stats = (array) $counts[0];
         } catch (Throwable $e) {
             Log::error('Dashboard stats query failed: ' . $e->getMessage());
             $dbError = 'Database connection error. Please check your DB_CONNECTION and database server.';
@@ -71,21 +76,27 @@ class DashboardController extends Controller
 
         if ($dbError === null) {
             try {
-                $rawStockKg = (float) RawInventoryMovement::query()
-                    ->selectRaw("COALESCE(SUM(CASE WHEN type='IN' THEN quantity ELSE -quantity END),0) as stock")
-                    ->value('stock');
+                $kpiData = DB::select("
+                    SELECT
+                        (SELECT COALESCE(SUM(CASE WHEN type='IN' THEN quantity ELSE -quantity END),0) FROM raw_inventory_movements) as raw_stock,
+                        (SELECT COALESCE(SUM(CASE WHEN type='IN' THEN quantity ELSE -quantity END),0) FROM finished_inventory_movements) as finished_stock,
+                        (SELECT COALESCE(SUM(total_amount),0) FROM sales) as sales_revenue,
+                        (SELECT COALESCE(SUM(amount),0) FROM payments) as payments_collected,
+                        (SELECT COALESCE(SUM(accepted_quantity),0) FROM maize_collections) as maize_accepted,
+                        (SELECT COALESCE(SUM(maize_used),0) FROM production_batches) as maize_used,
+                        (SELECT COALESCE(SUM(wastage_quantity),0) FROM production_batches) as wastage_kg,
+                        (SELECT COALESCE(SUM(quantity),0) FROM sale_returns) as returns_kg
+                ")[0];
 
-                $finishedStockKg = (float) FinishedInventoryMovement::query()
-                    ->selectRaw("COALESCE(SUM(CASE WHEN type='IN' THEN quantity ELSE -quantity END),0) as stock")
-                    ->value('stock');
-
-                $salesRevenue = (float) Sale::query()->sum('total_amount');
-                $paymentsCollected = (float) Payment::query()->sum('amount');
+                $rawStockKg = (float) $kpiData->raw_stock;
+                $finishedStockKg = (float) $kpiData->finished_stock;
+                $salesRevenue = (float) $kpiData->sales_revenue;
+                $paymentsCollected = (float) $kpiData->payments_collected;
                 $outstanding = max(0, $salesRevenue - $paymentsCollected);
-                $maizeAccepted = (float) MaizeCollection::query()->sum('accepted_quantity');
-                $maizeUsed = (float) ProductionBatch::query()->sum('maize_used');
-                $wastageKg = (float) ProductionBatch::query()->sum('wastage_quantity');
-                $returnsKg = (float) SaleReturn::query()->sum('quantity');
+                $maizeAccepted = (float) $kpiData->maize_accepted;
+                $maizeUsed = (float) $kpiData->maize_used;
+                $wastageKg = (float) $kpiData->wastage_kg;
+                $returnsKg = (float) $kpiData->returns_kg;
                 $productionEfficiency = $maizeUsed > 0 ? ($maizeUsed - $wastageKg) / $maizeUsed * 100 : 0.0;
 
                 $kpis = [
@@ -135,4 +146,3 @@ class DashboardController extends Controller
         ]);
     }
 }
-
