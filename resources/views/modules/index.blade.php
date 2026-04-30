@@ -14,13 +14,12 @@
 <body>
 <div class="shell">
     <aside class="sidebar">
-        <div class="brand">
-            <span class="brand-mark" aria-hidden="true"></span>
-            <span class="brand-text">HIGA<span style="color:#d8ba4a">GROUP</span>
+<div class="brand">
+            <img src="{{ asset('higalog.jpg') }}" alt="HigaGroup Logo" style="max-height:32px;width:auto;border-radius:6px;">
         </div>
-        <nav class="menu">
+<nav class="menu">
             @foreach($menuItems as $item)
-                <a href="{{ $item['href'] }}" class="{{ $navActive === $item['slug'] ? 'active' : '' }}">
+                <a href="{{ $item['endpoint'] ?? $item['href'] }}" class="{{ $navActive === $item['slug'] ? 'active' : '' }}">
                     <i class="fas {{ $item['icon'] ?? 'fa-circle' }}"></i>
                     {{ $item['label'] }}
                 </a>

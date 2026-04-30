@@ -22,8 +22,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     
-    // Protected routes with role-based access
-    Route::middleware('role:admin,manager,clerk')->group(function (): void {
+// Protected routes with role-based access (all role types from ImsMenu)
+    Route::middleware('role:admin,collection-officer,production-manager,sales-team,manager,clerk')->group(function (): void {
         Route::get('/modules/{module}', [ModuleController::class, 'show'])->name('modules.show');
         Route::get('/modules/{module}/{id}/edit', [ModuleController::class, 'edit'])->name('modules.edit');
         Route::post('/modules/{module}', [ModuleController::class, 'store'])->name('modules.store');

@@ -352,6 +352,14 @@ private function dashboardData(string $activeModule): array
 
         $menuItems = ImsMenu::moduleNav(auth()->user());
 
+        // Add users menu for admins
+        if (auth()->check() && auth()->user()->isAdmin()) {
+            $hasUsers = collect($menuItems)->contains('slug', 'users');
+            if (!$hasUsers) {
+                $menuItems[] = ['slug' => 'users', 'label' => 'Users', 'endpoint' => route('users.index'), 'icon' => 'fa-users'];
+            }
+        }
+
         return [$stats, $menuItems];
     }
 

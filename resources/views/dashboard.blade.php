@@ -18,9 +18,9 @@
             <img src="{{ asset('higalog.jpg') }}" alt="HigaGroup Logo" style="max-height:32px;width:auto;border-radius:6px;">
         </div>
 
-        <nav class="menu">
+<nav class="menu">
             @foreach ($menuItems as $item)
-                <a href="{{ $item['endpoint'] }}" class="{{ $activeModule === $item['slug'] ? 'active' : '' }}">
+                <a href="{{ $item['endpoint'] ?? $item['href'] ?? '#' }}" class="{{ $activeModule === $item['slug'] ? 'active' : '' }}">
                     <i class="fas {{ $item['icon'] ?? 'fa-circle' }}"></i>
                     {{ $item['label'] }}
                 </a>

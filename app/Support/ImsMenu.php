@@ -35,26 +35,26 @@ class ImsMenu
             ['slug' => 'profile', 'label' => 'Profile', 'href' => route('profile.edit'), 'icon' => 'fa-solid fa-user'],
         ];
 
-        // If no user or admin, return all
+// If no user or admin, return all (use Collect for consistency)
         if (!$user || !$user->role) {
-            return $all;
+            return collect($all)->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']])->values()->toArray();
         }
 
         $roleSlug = $user->role->slug;
         if ($roleSlug === 'admin') {
-            return $all;
+            return collect($all)->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']])->values()->toArray();
         }
 
-        // Get allowed modules for role
+// Get allowed modules for role
         $allowed = self::ROLE_MODULES[$roleSlug] ?? [];
         if (!$allowed) {
-            return $all;
+            return collect($all)->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']])->values()->toArray();
         }
 
         // Map slugs to include warehouses (locations)
         $include = array_merge($allowed, ['warehouse' => 'locations']);
 
-return array_filter($all, fn($item) => in_array($item['slug'], $allowed) || in_array($item['slug'], ['dashboard', 'profile']))
+        return collect(array_filter($all, fn($item) => in_array($item['slug'], $allowed) || in_array($item['slug'], ['dashboard', 'profile'])))
             ->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']])
             ->values()
             ->toArray();
