@@ -54,7 +54,10 @@ class ImsMenu
         // Map slugs to include warehouses (locations)
         $include = array_merge($allowed, ['warehouse' => 'locations']);
 
-        return array_filter($all, fn($item) => in_array($item['slug'], $allowed) || in_array($item['slug'], ['dashboard', 'profile']));
+return array_filter($all, fn($item) => in_array($item['slug'], $allowed) || in_array($item['slug'], ['dashboard', 'profile']))
+            ->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']])
+            ->values()
+            ->toArray();
     }
 }
 
