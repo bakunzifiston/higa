@@ -54,7 +54,7 @@ class DashboardController extends Controller
             $stats = array_fill_keys(['farmers','locations','collections','products','production_batches','sales'], 0);
         }
 
-        $menuItems = [
+$menuItems = [
             ['slug' => 'dashboard', 'label' => 'Dashboard', 'endpoint' => '/dashboard', 'metric' => $stats['sales'] ?? 0, 'icon' => 'fa-tachometer-alt'],
             ['slug' => 'farmers', 'label' => 'Farmers', 'endpoint' => '/modules/farmers', 'metric' => $stats['farmers'] ?? 0, 'icon' => 'fa-tractor'],
             ['slug' => 'locations', 'label' => 'Locations', 'endpoint' => '/modules/locations', 'metric' => $stats['locations'] ?? 0, 'icon' => 'fa-map-marker-alt'],
@@ -67,8 +67,14 @@ class DashboardController extends Controller
             ['slug' => 'returns', 'label' => 'Returns', 'endpoint' => '/modules/returns', 'metric' => $stats['sales'] ?? 0, 'icon' => 'fa-undo'],
             ['slug' => 'expenses', 'label' => 'Expenses', 'endpoint' => '/modules/expenses', 'metric' => $stats['production_batches'] ?? 0, 'icon' => 'fa-file-invoice-dollar'],
             ['slug' => 'payments', 'label' => 'Payments', 'endpoint' => '/modules/payments', 'metric' => $stats['sales'] ?? 0, 'icon' => 'fa-money-check-alt'],
-            ['slug' => 'profile', 'label' => 'Profile', 'endpoint' => route('profile.edit'), 'metric' => '—', 'icon' => 'fa-user-circle'],
         ];
+        
+        // Add Users menu for admins only
+        if (auth()->check() && auth()->user()->role && auth()->user()->role->slug === 'admin') {
+            $menuItems[] = ['slug' => 'users', 'label' => 'Users', 'endpoint' => route('users.index'), 'metric' => '—', 'icon' => 'fa-users'];
+        }
+        
+        $menuItems[] = ['slug' => 'profile', 'label' => 'Profile', 'endpoint' => route('profile.edit'), 'metric' => '—', 'icon' => 'fa-user-circle'];
 
         $activeModule = $request->query('module', 'dashboard');
         $currentModule = collect($menuItems)->firstWhere('slug', $activeModule)
