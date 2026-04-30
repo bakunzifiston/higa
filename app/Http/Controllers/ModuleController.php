@@ -337,7 +337,7 @@ class ModuleController extends Controller
         ];
     }
 
-    private function dashboardData(string $activeModule): array
+private function dashboardData(string $activeModule): array
     {
         $counts = DB::select("
             SELECT
@@ -350,25 +350,37 @@ class ModuleController extends Controller
         ");
         $stats = (array) $counts[0];
 
-        $menuItems = ImsMenu::moduleNav();
+        $menuItems = ImsMenu::moduleNav(auth()->user());
 
         return [$stats, $menuItems];
     }
 
     private function allowedModules(): array
     {
-        return [
-            'farmers',
-            'locations',
-            'collections',
-            'raw-inventory',
-            'production',
-            'products',
-            'finished-inventory',
-            'sales',
-            'returns',
-            'expenses',
-            'payments',
-        ];
+        // If not logged in, no modules
+        if (!auth()->check()) {
+            return [];
+        }
+
+        // Admin gets all modules
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            return [
+                'farmers',
+                'locations',
+                'collections',
+                'raw-inventory',
+                'production',
+                'products',
+                'finished-inventory',
+                'sales',
+                'returns',
+                'expenses',
+                'payments',
+            ];
+        }
+
+        // Get allowed modules for role using ImsMenu
+        return array_column(ImsMenu::moduleNav($user), 'slug');
     }
 }
