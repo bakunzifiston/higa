@@ -74,9 +74,18 @@
             </div>
         </div>
 
-        <section class="welcome">
+<section class="welcome">
+            @php
+                $welcomeMessages = [
+                    'admin' => 'Real-time overview of maize processing operations across all modules.',
+                    'collection-officer' => 'Manage farmers, warehouses, and maize collections from suppliers.',
+                    'production-manager' => 'Track production batches, inventory, and processing efficiency.',
+                    'sales-team' => 'Monitor sales, payments, and customer orders.',
+                ];
+                $welcome = $welcomeMessages[$roleSlug] ?? $welcomeMessages['admin'];
+            @endphp
             <h1><i class="fas fa-wave-square" style="color:var(--brand-green)"></i> Welcome, {{ auth()->user()->name }}</h1>
-            <p><i class="fas fa-chart-pie" style="margin-right:6px;color:var(--muted)"></i>Real-time overview of maize processing operations across all modules.</p>
+            <p><i class="fas fa-chart-pie" style="margin-right:6px;color:var(--muted)"></i>{{ $welcome }}</p>
         </section>
 
         @if($dbError)
@@ -97,8 +106,10 @@
             @endforeach
         </section>
 
-        <section class="content-grid">
+<section class="content-grid">
             <div class="left-stack">
+                {{-- Collections panel: show for collection-officer and admin --}}
+                @if(in_array($roleSlug, ['collection-officer', 'admin']))
                 <section class="card table-card">
                     <h3 class="panel-title"><i class="fas fa-seedling"></i> Recent Maize Collections</h3>
                     <table>
@@ -126,7 +137,10 @@
                         </tbody>
                     </table>
                 </section>
+                @endif
 
+                {{-- Sales panel: show for sales-team and admin --}}
+                @if(in_array($roleSlug, ['sales-team', 'admin']))
                 <section class="card table-card">
                     <h3 class="panel-title"><i class="fas fa-receipt"></i> Recent Sales</h3>
                     <table>
@@ -152,6 +166,7 @@
                         </tbody>
                     </table>
                 </section>
+                @endif
             </div>
 
             <div class="right-stack">
@@ -161,6 +176,9 @@
                     $emptyPct = max(0, 100 - $yield - $wastage);
                     $grad = "conic-gradient(var(--brand-green-dark) 0% {$yield}%, var(--brand-orange) {$yield}% " . ($yield + $wastage) . "%, #e5e7eb " . ($yield + $wastage) . "% 100%)";
                 @endphp
+
+                {{-- Production panel: show for production-manager and admin --}}
+                @if(in_array($roleSlug, ['production-manager', 'admin']))
                 <article class="card">
                     <h3 class="panel-title"><i class="fas fa-chart-pie"></i> Production Efficiency</h3>
                     <div class="status">
@@ -214,6 +232,7 @@
                         @endforelse
                     </div>
                 </article>
+                @endif
             </div>
         </section>
     </main>

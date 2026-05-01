@@ -10,8 +10,12 @@ use App\Domain\Sales\Models\Sale;
 
 class DashboardService
 {
-    public function build(): array
+    /**
+     * Build dashboard data based on user role.
+     */
+    public function build(?string $roleSlug = null): array
     {
+        $roleSlug = $roleSlug ?? 'admin';
         $rawStock = RawInventoryMovement::query()
             ->selectRaw("location_id, SUM(CASE WHEN type='IN' THEN quantity ELSE -quantity END) as quantity")
             ->groupBy('location_id')
