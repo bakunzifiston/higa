@@ -19,7 +19,7 @@
         </div>
 <nav class="menu">
             @foreach($menuItems as $item)
-                <a href="{{ $item['endpoint'] ?? $item['href'] }}" class="{{ $navActive === $item['slug'] ? 'active' : '' }}">
+<a href="{{ $item['endpoint'] ?? $item['href'] ?? '#' }}" class="{{ $navActive === $item['slug'] ? 'active' : '' }}">
                     <i class="fas {{ $item['icon'] ?? 'fa-circle' }}"></i>
                     {{ $item['label'] }}
                 </a>
