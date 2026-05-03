@@ -33,6 +33,12 @@
             .welcome-hero p{margin:0 0 1.75rem;font-size:1.05rem;line-height:1.6;color:var(--muted)}
             .welcome-cta{display:inline-flex;padding:0.65rem 1.35rem;font-size:1rem;font-weight:600;text-decoration:none;color:#fff;background:var(--brand-green);border:1px solid var(--brand-green-dark);border-radius:10px}
             .welcome-cta:hover{background:var(--brand-green-dark)}
+            .welcome-panel{max-width:40rem;margin:0 auto 2.5rem;padding:1.5rem 1.25rem;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 3px rgba(23,19,34,0.06)}
+            .welcome-panel h2{margin:0 0 0.75rem;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--brand-green-dark)}
+            .welcome-panel ul{margin:0;padding:0;list-style:none;text-align:left;font-size:0.95rem;line-height:1.5}
+            .welcome-panel li{position:relative;padding-left:1.35rem;margin-bottom:0.6rem}
+            .welcome-panel li::before{content:'';position:absolute;left:0;top:0.55em;width:0.4rem;height:0.4rem;border-radius:50%;background:var(--brand-green);box-shadow:0 0 0 2px rgba(95,158,61,0.25)}
+            .welcome-foot{padding:1.25rem 1.5rem 2rem;text-align:center;font-size:0.8rem;color:var(--muted)}
         </style>
     @endif
 </head>
@@ -75,5 +81,18 @@
         @endguest
     </main>
 
+    <section class="welcome-panel" aria-labelledby="welcome-capabilities">
+        <h2 id="welcome-capabilities"><i class="fas fa-bolt" style="margin-right:6px"></i>At a glance</h2>
+        <ul>
+            <li><i class="fas fa-tractor" style="margin-right:6px;color:var(--brand-green)"></i>Maize collection from farmers with quality checks and rejection tracking</li>
+            <li><i class="fas fa-industry" style="margin-right:6px;color:var(--brand-green)"></i>Production batches for Kawunga, Blanda, and Animal Feed with wastage recording</li>
+            <li><i class="fas fa-warehouse" style="margin-right:6px;color:var(--brand-green)"></i>Finished goods inventory across multiple locations with expiry tracking</li>
+            <li><i class="fas fa-chart-line" style="margin-right:6px;color:var(--brand-green)"></i>Sales, returns, payments, and real-time dashboards</li>
+        </ul>
+    </section>
+
+    <footer class="welcome-foot">
+        <i class="fas fa-code" style="margin-right:4px"></i>Laravel {{ app()->version() }}
+    </footer>
 </body>
 </html>
