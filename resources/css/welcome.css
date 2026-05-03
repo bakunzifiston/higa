@@ -165,6 +165,39 @@ body.welcome-page {
     opacity: 0.9;
 }
 
+.welcome-body {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.welcome-layout {
+    display: grid;
+    gap: 1.25rem;
+    align-items: center;
+}
+
+.welcome-side {
+    display: block;
+    max-width: 20rem;
+    margin: 0 auto 0.5rem;
+}
+
+.welcome-side-card {
+    background: linear-gradient(180deg, #ffffff, #f7faf3);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 8px 20px rgba(23, 19, 34, 0.06);
+}
+
+.welcome-side-icon {
+    width: min(100%, 260px);
+    margin: 0 auto;
+    display: block;
+    color: var(--brand-green-dark);
+}
+
 .welcome-panel {
     max-width: 40rem;
     margin: 0 auto 2.5rem;
@@ -240,5 +273,24 @@ body.welcome-page {
 
     .welcome-panel {
         padding: 1.75rem 1.5rem;
+    }
+}
+
+@media (min-width: 64rem) {
+    .welcome-layout {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 2rem;
+    }
+
+    .welcome-side {
+        max-width: none;
+        margin: 0;
+    }
+
+    .welcome-hero {
+        max-width: none;
+        margin: 0;
+        text-align: left;
+        padding-left: 0;
     }
 }
