@@ -3,6 +3,8 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/higanvac/ims
+    # Verify in cPanel deploy output that this commit matches GitHub after Pull + Deploy
+    - cd "$DEPLOYPATH" && /bin/echo "DEPLOY_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ) HEAD=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
     - /bin/cp public/index.php "$DEPLOYPATH/public/index.php"
     - /bin/cp public/.htaccess "$DEPLOYPATH/public/.htaccess"
     - cd "$DEPLOYPATH" && composer install --no-dev --optimize-autoloader --no-interaction
