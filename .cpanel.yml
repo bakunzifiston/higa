@@ -1,11 +1,17 @@
 ---
-# Repository Path must stay in sync with DEPLOYPATH; Laravel doc root = $DEPLOYPATH/public
+# Site Document Root should be $DEPLOYPATH/public .
+# Typical: subdomain folder .../ims.higagroup.rw/higa/public .
+#
+# REPOPATH = cPanel Git "Repository Path" (where pull updates live).
+# DEPLOYPATH = Laravel root containing public/ actually used by ims.higagroup.rw .
+# Adjust both if your usernames/paths differ.
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/higanvac/ims
-    # Verify in cPanel deploy output that this commit matches GitHub after Pull + Deploy
-    - cd "$DEPLOYPATH" && /bin/echo "DEPLOY_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ) HEAD=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
-    - /bin/cp public/index.php "$DEPLOYPATH/public/index.php"
-    - /bin/cp public/.htaccess "$DEPLOYPATH/public/.htaccess"
+    - export REPOPATH=/home/higanvac/ims
+    - export DEPLOYPATH=/home/higanvac/ims.higagroup.rw/higa
+    - cd "$REPOPATH" && /bin/echo "DEPLOY_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ) REPO_HEAD=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+    - cd "$REPOPATH" && /usr/bin/rsync -a --exclude='.git/' --exclude='node_modules/' --exclude='vendor/' --exclude='.env' --exclude='storage/' ./ "$DEPLOYPATH/"
+    - cd "$REPOPATH" && /bin/cp public/index.php "$DEPLOYPATH/public/index.php"
+    - cd "$REPOPATH" && /bin/cp public/.htaccess "$DEPLOYPATH/public/.htaccess"
     - cd "$DEPLOYPATH" && composer install --no-dev --optimize-autoloader --no-interaction
     - cd "$DEPLOYPATH" && php artisan optimize:clear --no-ansi
