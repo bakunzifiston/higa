@@ -27,6 +27,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -55,6 +56,31 @@ class ModuleController extends Controller
             'menuItems' => $menuItems,
             'records' => $this->recordsForModule($module),
             'lookups' => $this->lookupData(),
+            'editRecord' => null,
+        ]);
+    }
+
+    public function edit(string $module, int $id): View
+    {
+        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
+
+        [$stats, $menuItems] = $this->dashboardData($module);
+
+        $editRecord = match ($module) {
+            'farmers' => Farmer::query()->findOrFail($id),
+            'locations' => Location::query()->findOrFail($id),
+            'products' => Product::query()->findOrFail($id),
+            'collections' => MaizeCollection::query()->findOrFail($id),
+        };
+
+        return view('modules.index', [
+            'module' => $module,
+            'navActive' => $module,
+            'stats' => $stats,
+            'menuItems' => $menuItems,
+            'records' => $this->recordsForModule($module),
+            'lookups' => $this->lookupData(),
+            'editRecord' => $editRecord,
         ]);
     }
 
@@ -85,9 +111,10 @@ class ModuleController extends Controller
                     'village' => ['required', 'string', 'max:120'],
                     'is_active' => ['nullable', 'boolean'],
                 ])),
-                'collections' => $this->maizeCollectionService->record($request->validate([
+'collections' => $this->maizeCollectionService->record($request->validate([
                     'farmer_id' => ['required', 'integer', 'exists:farmers,id'],
                     'location_id' => ['required', 'integer', 'exists:locations,id'],
+                    'product_name' => ['nullable', 'string', 'max:255'],
                     'collection_date' => ['required', 'date'],
                     'quantity_collected' => ['required', 'numeric', 'gt:0'],
                     'quantity_rejected' => ['nullable', 'numeric', 'gte:0'],
@@ -132,7 +159,7 @@ class ModuleController extends Controller
 
     public function update(Request $request, string $module, int $id): RedirectResponse
     {
-        abort_unless(in_array($module, ['farmers', 'locations', 'products'], true), 404);
+        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
 
         match ($module) {
             'farmers' => Farmer::query()->findOrFail($id)->update($request->validate([
@@ -161,6 +188,15 @@ class ModuleController extends Controller
                 'sku' => ['required', 'string', 'max:120', Rule::unique('products', 'sku')->ignore($id)],
                 'is_active' => ['nullable', 'boolean'],
             ])),
+            'collections' => MaizeCollection::query()->findOrFail($id)->update($request->validate([
+                'farmer_id' => ['required', 'integer', 'exists:farmers,id'],
+                'location_id' => ['required', 'integer', 'exists:locations,id'],
+                'collection_date' => ['required', 'date'],
+                'quantity_collected' => ['required', 'numeric', 'gt:0'],
+                'quantity_rejected' => ['nullable', 'numeric', 'gte:0'],
+                'rejection_reason' => ['nullable', 'string'],
+                'price_per_kg' => ['required', 'numeric', 'gt:0'],
+            ])),
         };
 
         return redirect()->route('modules.show', ['module' => $module])->with('success', 'Record updated.');
@@ -168,12 +204,13 @@ class ModuleController extends Controller
 
     public function destroy(string $module, int $id): RedirectResponse
     {
-        abort_unless(in_array($module, ['farmers', 'locations', 'products'], true), 404);
+        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
 
         match ($module) {
             'farmers' => Farmer::query()->findOrFail($id)->delete(),
             'locations' => Location::query()->findOrFail($id)->delete(),
             'products' => Product::query()->findOrFail($id)->delete(),
+            'collections' => MaizeCollection::query()->findOrFail($id)->delete(),
         };
 
         return redirect()->route('modules.show', ['module' => $module])->with('success', 'Record deleted.');
@@ -240,16 +277,50 @@ class ModuleController extends Controller
             'farmers' => Farmer::query()->latest()->paginate(15),
             'locations' => Location::query()->latest()->paginate(15),
             'collections' => MaizeCollection::query()->with(['farmer', 'location'])->latest('collection_date')->paginate(15),
-            'raw-inventory' => RawInventoryMovement::query()->latest('movement_date')->paginate(20),
-            'production' => ProductionBatch::query()->with(['outputs'])->latest('production_date')->paginate(15),
+'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection', 'productionBatch'])->latest('movement_date')->paginate(20),
+        'production' => ProductionBatch::query()
+            ->with(['location', 'outputs.product', 'outputs.package', 'expenses', 'wastage'])
+            ->latest('production_date')
+            ->paginate(15),
             'products' => Product::query()->latest()->paginate(15),
-            'finished-inventory' => FinishedInventoryMovement::query()->latest('movement_date')->paginate(20),
+            'finished-inventory' => $this->finishedInventoryStock(),
             'sales' => Sale::query()->with('items')->latest('sale_date')->paginate(15),
             'returns' => SaleReturn::query()->with(['sale', 'saleItem'])->latest('return_date')->paginate(15),
             'expenses' => BatchExpense::query()->with('batch')->latest()->paginate(20),
             'payments' => Payment::query()->with('sale')->latest('payment_date')->paginate(20),
             default => collect(),
         };
+    }
+
+    private function finishedInventoryStock(): mixed
+    {
+        $stocks = FinishedInventoryMovement::query()
+            ->selectRaw('
+                product_id,
+                location_id,
+                SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) - SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) as available_stock,
+                MAX(movement_date) as production_date,
+                MAX(expiry_date) as expiry_date
+            ', [FinishedInventoryMovement::TYPE_IN, FinishedInventoryMovement::TYPE_OUT])
+            ->groupBy('product_id', 'location_id')
+            ->havingRaw('SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) - SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) > 0', [FinishedInventoryMovement::TYPE_IN, FinishedInventoryMovement::TYPE_OUT])
+            ->with(['product', 'location'])
+            ->orderByDesc('production_date')
+            ->paginate(20);
+
+        $stocks->getCollection()->transform(function ($item) {
+            $item->id = "{$item->product_id}-{$item->location_id}";
+            $item->stock = $item->available_stock;
+            $item->quality = optional($item->product)->quality_percentage ?? '-';
+            $item->unit_cost = optional($item->product)->cost_price ?? 0;
+            $item->suggested_price = optional($item->product)->selling_price ?? 0;
+            $item->total_value = ($item->unit_cost ?? 0) * (float) $item->stock;
+            $item->production_date = $item->production_date ? \Carbon\Carbon::parse($item->production_date) : null;
+            $item->expiry_date = $item->expiry_date ? \Carbon\Carbon::parse($item->expiry_date) : null;
+            return $item;
+        });
+
+        return $stocks;
     }
 
     private function lookupData(): array
@@ -266,36 +337,58 @@ class ModuleController extends Controller
         ];
     }
 
-    private function dashboardData(string $activeModule): array
+private function dashboardData(string $activeModule): array
     {
-        $stats = [
-            'farmers' => Farmer::query()->count(),
-            'locations' => Location::query()->count(),
-            'collections' => MaizeCollection::query()->count(),
-            'products' => Product::query()->count(),
-            'production_batches' => ProductionBatch::query()->count(),
-            'sales' => Sale::query()->count(),
-        ];
+        $counts = DB::select("
+            SELECT
+                (SELECT COUNT(*) FROM farmers) as farmers,
+                (SELECT COUNT(*) FROM locations) as locations,
+                (SELECT COUNT(*) FROM maize_collections) as collections,
+                (SELECT COUNT(*) FROM products) as products,
+                (SELECT COUNT(*) FROM production_batches) as production_batches,
+                (SELECT COUNT(*) FROM sales) as sales
+        ");
+        $stats = (array) $counts[0];
 
-        $menuItems = ImsMenu::moduleNav();
+        $menuItems = ImsMenu::moduleNav(auth()->user());
+
+        // Add users menu for admins
+        if (auth()->check() && auth()->user()->isAdmin()) {
+            $hasUsers = collect($menuItems)->contains('slug', 'users');
+            if (!$hasUsers) {
+                $menuItems[] = ['slug' => 'users', 'label' => 'Users', 'endpoint' => route('users.index'), 'icon' => 'fa-users'];
+            }
+        }
 
         return [$stats, $menuItems];
     }
 
     private function allowedModules(): array
     {
-        return [
-            'farmers',
-            'locations',
-            'collections',
-            'raw-inventory',
-            'production',
-            'products',
-            'finished-inventory',
-            'sales',
-            'returns',
-            'expenses',
-            'payments',
-        ];
+        // If not logged in, no modules
+        if (!auth()->check()) {
+            return [];
+        }
+
+        // Admin gets all modules
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            return [
+                'farmers',
+                'locations',
+                'collections',
+                'raw-inventory',
+                'production',
+                'products',
+                'finished-inventory',
+                'sales',
+                'returns',
+                'expenses',
+                'payments',
+            ];
+        }
+
+        // Get allowed modules for role using ImsMenu
+        return array_column(ImsMenu::moduleNav($user), 'slug');
     }
 }

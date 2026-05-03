@@ -12,11 +12,11 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function edit(Request $request): View
+public function edit(Request $request): View
     {
         return view('profile.edit', [
             'user' => $request->user(),
-            'menuItems' => ImsMenu::moduleNav(),
+            'menuItems' => ImsMenu::moduleNav($request->user()),
             'navActive' => 'profile',
         ]);
     }

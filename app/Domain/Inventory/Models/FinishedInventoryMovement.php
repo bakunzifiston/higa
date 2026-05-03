@@ -26,12 +26,14 @@ class FinishedInventoryMovement extends Model
         'product_package_id',
         'location_id',
         'quantity',
+        'expiry_date',
         'reference_id',
         'movement_date',
     ];
 
     protected $casts = [
         'quantity' => 'decimal:3',
+        'expiry_date' => 'date',
         'movement_date' => 'datetime',
     ];
 

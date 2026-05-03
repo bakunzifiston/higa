@@ -32,6 +32,7 @@ class MaizeCollectionService
             $collection = MaizeCollection::query()->create([
                 'farmer_id' => $data['farmer_id'],
                 'location_id' => $data['location_id'],
+                'product_name' => $data['product_name'] ?? null,
                 'collection_date' => $data['collection_date'],
                 'quantity_collected' => $data['quantity_collected'],
                 'quantity_rejected' => $data['quantity_rejected'] ?? 0,

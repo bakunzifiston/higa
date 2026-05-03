@@ -15,11 +15,17 @@ class Product extends Model
     protected $fillable = [
         'name',
         'sku',
+        'description',
+        'classification',
+        'cost_price',
+        'selling_price',
         'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'cost_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
     ];
 
     public function packages(): HasMany

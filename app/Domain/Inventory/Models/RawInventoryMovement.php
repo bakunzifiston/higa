@@ -5,6 +5,8 @@ namespace App\Domain\Inventory\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Domain\Collections\Models\MaizeCollection;
+use App\Domain\Production\Models\ProductionBatch;
 
 class RawInventoryMovement extends Model
 {
@@ -33,5 +35,15 @@ class RawInventoryMovement extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function collection(): BelongsTo
+    {
+        return $this->belongsTo(MaizeCollection::class, 'reference_id', 'id');
+    }
+
+    public function productionBatch(): BelongsTo
+    {
+        return $this->belongsTo(ProductionBatch::class, 'reference_id', 'id');
     }
 }

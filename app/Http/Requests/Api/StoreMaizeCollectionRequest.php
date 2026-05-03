@@ -16,6 +16,7 @@ class StoreMaizeCollectionRequest extends FormRequest
         return [
             'farmer_id' => ['required', 'integer', 'exists:farmers,id'],
             'location_id' => ['required', 'integer', 'exists:locations,id'],
+            'product_name' => ['nullable', 'string', 'max:255'],
             'collection_date' => ['required', 'date'],
             'quantity_collected' => ['required', 'numeric', 'gt:0'],
             'quantity_rejected' => ['nullable', 'numeric', 'gte:0'],

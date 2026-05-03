@@ -13,6 +13,7 @@ class MaizeCollectionResource extends JsonResource
             'id' => $this->id,
             'farmer_id' => $this->farmer_id,
             'location_id' => $this->location_id,
+            'product_name' => $this->product_name,
             'collection_date' => $this->collection_date,
             'quantity_collected' => $this->quantity_collected,
             'quantity_rejected' => $this->quantity_rejected,
