@@ -11,6 +11,8 @@ deployment:
     - export DEPLOYPATH=/home/higanvac/ims.higagroup.rw/higa
     - cd "$REPOPATH" && /bin/echo "DEPLOY_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ) REPO_HEAD=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
     - cd "$REPOPATH" && /usr/bin/rsync -a --exclude='.git/' --exclude='node_modules/' --exclude='vendor/' --exclude='.env' --exclude='storage/' ./ "$DEPLOYPATH/"
+    # Drop stale manifest if repo no longer ships it; composer post-autoload regenerates for --no-dev.
+    - rm -f "$DEPLOYPATH/bootstrap/cache/packages.php" "$DEPLOYPATH/bootstrap/cache/services.php"
     - cd "$REPOPATH" && /bin/cp public/index.php "$DEPLOYPATH/public/index.php"
     - cd "$REPOPATH" && /bin/cp public/.htaccess "$DEPLOYPATH/public/.htaccess"
     - cd "$DEPLOYPATH" && composer install --no-dev --optimize-autoloader --no-interaction
