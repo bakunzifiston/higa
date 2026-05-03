@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+    # Use when Document Root is the Laravel project folder ( …/higa ), not …/higa/public .
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
+</IfModule>
