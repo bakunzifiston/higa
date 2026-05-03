@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('production_batches', function (Blueprint $table) {
             $table->id();
-            $table->string('batch_number')->unique();
+            $table->string('batch_number', 191)->unique();
             $table->foreignId('location_id')->constrained('locations')->restrictOnDelete();
             $table->decimal('maize_used', 14, 3);
             $table->decimal('quantity_produced', 14, 3);

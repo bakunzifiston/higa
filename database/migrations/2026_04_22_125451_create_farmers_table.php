@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('farmers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('phone')->unique();
+            $table->string('phone', 191)->unique();
             $table->string('country');
             $table->string('province');
             $table->string('district');
