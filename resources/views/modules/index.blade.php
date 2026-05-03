@@ -395,7 +395,7 @@
                     </tr>
 @elseif($module === 'raw-inventory')
                     <tr>
-                        <td>{{ $record->collection?->product_name ?? 'Raw Material' }}</td>
+                        <td>{{ optional($record->collection ?? $record->collectionByReference)->product_name ?? 'Raw Material' }}</td>
                         <td><span class="badge {{ $record->type === 'IN' ? 'badge-success' : 'badge-warning' }}">{{ $record->type }}</span></td>
                         <td>
                             @if($record->source === 'collection')

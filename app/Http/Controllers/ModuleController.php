@@ -161,43 +161,48 @@ class ModuleController extends Controller
     {
         abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
 
-        match ($module) {
-            'farmers' => Farmer::query()->findOrFail($id)->update($request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'phone' => ['required', 'string', 'max:40', Rule::unique('farmers', 'phone')->ignore($id)],
-                'country' => ['required', 'string', 'max:120'],
-                'province' => ['required', 'string', 'max:120'],
-                'district' => ['required', 'string', 'max:120'],
-                'sector' => ['required', 'string', 'max:120'],
-                'cell' => ['required', 'string', 'max:120'],
-                'village' => ['required', 'string', 'max:120'],
-            ])),
-            'locations' => Location::query()->findOrFail($id)->update($request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'code' => ['required', 'string', 'max:80', Rule::unique('locations', 'code')->ignore($id)],
-                'country' => ['required', 'string', 'max:120'],
-                'province' => ['required', 'string', 'max:120'],
-                'district' => ['required', 'string', 'max:120'],
-                'sector' => ['required', 'string', 'max:120'],
-                'cell' => ['required', 'string', 'max:120'],
-                'village' => ['required', 'string', 'max:120'],
-                'is_active' => ['nullable', 'boolean'],
-            ])),
-            'products' => Product::query()->findOrFail($id)->update($request->validate([
-                'name' => ['required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($id)],
-                'sku' => ['required', 'string', 'max:120', Rule::unique('products', 'sku')->ignore($id)],
-                'is_active' => ['nullable', 'boolean'],
-            ])),
-            'collections' => MaizeCollection::query()->findOrFail($id)->update($request->validate([
-                'farmer_id' => ['required', 'integer', 'exists:farmers,id'],
-                'location_id' => ['required', 'integer', 'exists:locations,id'],
-                'collection_date' => ['required', 'date'],
-                'quantity_collected' => ['required', 'numeric', 'gt:0'],
-                'quantity_rejected' => ['nullable', 'numeric', 'gte:0'],
-                'rejection_reason' => ['nullable', 'string'],
-                'price_per_kg' => ['required', 'numeric', 'gt:0'],
-            ])),
-        };
+        try {
+            match ($module) {
+                'farmers' => Farmer::query()->findOrFail($id)->update($request->validate([
+                    'name' => ['required', 'string', 'max:255'],
+                    'phone' => ['required', 'string', 'max:40', Rule::unique('farmers', 'phone')->ignore($id)],
+                    'country' => ['required', 'string', 'max:120'],
+                    'province' => ['required', 'string', 'max:120'],
+                    'district' => ['required', 'string', 'max:120'],
+                    'sector' => ['required', 'string', 'max:120'],
+                    'cell' => ['required', 'string', 'max:120'],
+                    'village' => ['required', 'string', 'max:120'],
+                ])),
+                'locations' => Location::query()->findOrFail($id)->update($request->validate([
+                    'name' => ['required', 'string', 'max:255'],
+                    'code' => ['required', 'string', 'max:80', Rule::unique('locations', 'code')->ignore($id)],
+                    'country' => ['required', 'string', 'max:120'],
+                    'province' => ['required', 'string', 'max:120'],
+                    'district' => ['required', 'string', 'max:120'],
+                    'sector' => ['required', 'string', 'max:120'],
+                    'cell' => ['required', 'string', 'max:120'],
+                    'village' => ['required', 'string', 'max:120'],
+                    'is_active' => ['nullable', 'boolean'],
+                ])),
+                'products' => Product::query()->findOrFail($id)->update($request->validate([
+                    'name' => ['required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($id)],
+                    'sku' => ['required', 'string', 'max:120', Rule::unique('products', 'sku')->ignore($id)],
+                    'is_active' => ['nullable', 'boolean'],
+                ])),
+                'collections' => $this->maizeCollectionService->update($id, $request->validate([
+                    'farmer_id' => ['required', 'integer', 'exists:farmers,id'],
+                    'location_id' => ['required', 'integer', 'exists:locations,id'],
+                    'product_name' => ['nullable', 'string', 'max:255'],
+                    'collection_date' => ['required', 'date'],
+                    'quantity_collected' => ['required', 'numeric', 'gt:0'],
+                    'quantity_rejected' => ['nullable', 'numeric', 'gte:0'],
+                    'rejection_reason' => ['nullable', 'string'],
+                    'price_per_kg' => ['required', 'numeric', 'gt:0'],
+                ])),
+            };
+        } catch (DomainException $exception) {
+            return back()->withErrors(['module' => $exception->getMessage()])->withInput();
+        }
 
         return redirect()->route('modules.show', ['module' => $module])->with('success', 'Record updated.');
     }
@@ -206,12 +211,16 @@ class ModuleController extends Controller
     {
         abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
 
-        match ($module) {
-            'farmers' => Farmer::query()->findOrFail($id)->delete(),
-            'locations' => Location::query()->findOrFail($id)->delete(),
-            'products' => Product::query()->findOrFail($id)->delete(),
-            'collections' => MaizeCollection::query()->findOrFail($id)->delete(),
-        };
+        try {
+            match ($module) {
+                'farmers' => Farmer::query()->findOrFail($id)->delete(),
+                'locations' => Location::query()->findOrFail($id)->delete(),
+                'products' => Product::query()->findOrFail($id)->delete(),
+                'collections' => $this->maizeCollectionService->delete($id),
+            };
+        } catch (\DomainException $exception) {
+            return back()->withErrors(['module' => $exception->getMessage()]);
+        }
 
         return redirect()->route('modules.show', ['module' => $module])->with('success', 'Record deleted.');
     }
@@ -277,7 +286,10 @@ class ModuleController extends Controller
             'farmers' => Farmer::query()->latest()->paginate(15),
             'locations' => Location::query()->latest()->paginate(15),
             'collections' => MaizeCollection::query()->with(['farmer', 'location'])->latest('collection_date')->paginate(15),
-'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection', 'productionBatch'])->latest('movement_date')->paginate(20),
+            'raw-inventory' => RawInventoryMovement::query()
+                ->with(['location', 'collection', 'collectionByReference', 'productionBatch'])
+                ->latest('movement_date')
+                ->paginate(20),
         'production' => ProductionBatch::query()
             ->with(['location', 'outputs.product', 'outputs.package', 'expenses', 'wastage'])
             ->latest('production_date')
@@ -297,19 +309,20 @@ class ModuleController extends Controller
         $stocks = FinishedInventoryMovement::query()
             ->selectRaw('
                 product_id,
+                product_package_id,
                 location_id,
                 SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) - SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) as available_stock,
                 MAX(movement_date) as production_date,
                 MAX(expiry_date) as expiry_date
             ', [FinishedInventoryMovement::TYPE_IN, FinishedInventoryMovement::TYPE_OUT])
-            ->groupBy('product_id', 'location_id')
+            ->groupBy('product_id', 'product_package_id', 'location_id')
             ->havingRaw('SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) - SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) > 0', [FinishedInventoryMovement::TYPE_IN, FinishedInventoryMovement::TYPE_OUT])
-            ->with(['product', 'location'])
+            ->with(['product', 'location', 'package'])
             ->orderByDesc('production_date')
             ->paginate(20);
 
         $stocks->getCollection()->transform(function ($item) {
-            $item->id = "{$item->product_id}-{$item->location_id}";
+            $item->id = "{$item->product_id}-{$item->product_package_id}-{$item->location_id}";
             $item->stock = $item->available_stock;
             $item->quality = optional($item->product)->quality_percentage ?? '-';
             $item->unit_cost = optional($item->product)->cost_price ?? 0;

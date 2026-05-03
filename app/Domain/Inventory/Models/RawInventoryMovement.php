@@ -23,6 +23,8 @@ class RawInventoryMovement extends Model
         'source',
         'quantity',
         'location_id',
+        'maize_collection_id',
+        'production_batch_id',
         'reference_id',
         'movement_date',
     ];
@@ -37,13 +39,22 @@ class RawInventoryMovement extends Model
         return $this->belongsTo(Location::class);
     }
 
+    /**
+     * @deprecated prefer maize_collection_id; reference_id retained for backward compatibility only
+     */
     public function collection(): BelongsTo
     {
-        return $this->belongsTo(MaizeCollection::class, 'reference_id', 'id');
+        return $this->belongsTo(MaizeCollection::class, 'maize_collection_id');
     }
 
     public function productionBatch(): BelongsTo
     {
-        return $this->belongsTo(ProductionBatch::class, 'reference_id', 'id');
+        return $this->belongsTo(ProductionBatch::class, 'production_batch_id');
+    }
+
+    /** Legacy linkage when FK columns were not migrated yet */
+    public function collectionByReference(): BelongsTo
+    {
+        return $this->belongsTo(MaizeCollection::class, 'reference_id', 'id');
     }
 }

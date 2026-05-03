@@ -89,7 +89,7 @@ public function __invoke(Request $request): View
         if (auth()->check() && auth()->user()->isAdmin()) {
             $hasUsers = collect($menuItems)->contains('slug', 'users');
             if (!$hasUsers) {
-                $menuItems[] = ['slug' => 'users', 'label' => 'Users', 'href' => route('users.index'), 'icon' => 'fa-users'];
+                $menuItems[] = ['slug' => 'users', 'label' => 'Users', 'endpoint' => route('users.index'), 'icon' => 'fa-users'];
             }
         }
 

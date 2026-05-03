@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\V1\SaleController;
 use App\Http\Controllers\Api\V1\SaleReturnController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function (): void {
+Route::middleware('auth:sanctum')->prefix('v1')->group(function (): void {
     Route::apiResource('farmers', FarmerController::class);
     Route::apiResource('locations', LocationController::class);
     Route::apiResource('products', ProductController::class);

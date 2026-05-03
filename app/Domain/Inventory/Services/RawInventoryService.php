@@ -43,6 +43,7 @@ class RawInventoryService
             'source' => RawInventoryMovement::SOURCE_COLLECTION,
             'quantity' => $quantity,
             'location_id' => $locationId,
+            'maize_collection_id' => $collectionId,
             'reference_id' => $collectionId,
             'movement_date' => $dateTime,
         ]);
@@ -55,6 +56,7 @@ class RawInventoryService
             'source' => RawInventoryMovement::SOURCE_PRODUCTION,
             'quantity' => $quantity,
             'location_id' => $locationId,
+            'production_batch_id' => $batchId,
             'reference_id' => $batchId,
             'movement_date' => $dateTime,
         ]);
