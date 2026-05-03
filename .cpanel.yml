@@ -1,0 +1,9 @@
+---
+# Repository Path must stay in sync with DEPLOYPATH; Laravel doc root = $DEPLOYPATH/public
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/higanvac/ims
+    - /bin/cp public/index.php "$DEPLOYPATH/public/index.php"
+    - /bin/cp public/.htaccess "$DEPLOYPATH/public/.htaccess"
+    - cd "$DEPLOYPATH" && composer install --no-dev --optimize-autoloader --no-interaction
+    - cd "$DEPLOYPATH" && php artisan optimize:clear --no-ansi
