@@ -16,17 +16,17 @@
     <section class="left-panel">
         <div class="illustration" aria-hidden="true">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
-                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(145deg,var(--brand-gold),var(--brand-green));display:grid;place-items:center;">
-                    <i class="fas fa-leaf" style="color:#fff;font-size:1.4rem;"></i>
-                </div>
+                <img src="{{ asset('higalog.jpg') }}" alt="HigaGroup Logo" style="max-height:32px;width:auto;border-radius:6px;flex-shrink:0;">
                 <div>
                     <div style="font-weight:800;font-size:1.1rem;color:var(--brand-green-dark);">HigaGroup IMS</div>
                     <div style="font-size:0.8rem;color:var(--muted);">Maize Processing Operations</div>
+                </div>
             </div>
             <div class="desk"></div>
             <div class="desk-row">
                 <div class="desk-box"></div>
                 <div class="desk-box"></div>
+            </div>
             <div class="user-figure">
                 <div class="avatar"></div>
                 <div class="text-bars">
@@ -34,20 +34,20 @@
                     <span></span>
                     <span></span>
                 </div>
+            </div>
             <div style="margin-top:1.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
                 <span style="padding:4px 10px;border-radius:999px;background:rgba(95,158,61,0.12);color:var(--brand-green-dark);font-size:0.75rem;font-weight:600;"><i class="fas fa-tractor" style="margin-right:4px"></i>Farmers</span>
                 <span style="padding:4px 10px;border-radius:999px;background:rgba(95,158,61,0.12);color:var(--brand-green-dark);font-size:0.75rem;font-weight:600;"><i class="fas fa-industry" style="margin-right:4px"></i>Production</span>
                 <span style="padding:4px 10px;border-radius:999px;background:rgba(95,158,61,0.12);color:var(--brand-green-dark);font-size:0.75rem;font-weight:600;"><i class="fas fa-box" style="margin-right:4px"></i>Inventory</span>
                 <span style="padding:4px 10px;border-radius:999px;background:rgba(95,158,61,0.12);color:var(--brand-green-dark);font-size:0.75rem;font-weight:600;"><i class="fas fa-chart-line" style="margin-right:4px"></i>Sales</span>
             </div>
+        </div>
     </section>
 
     <section class="right-panel">
         <article class="login-card">
             <div style="margin-bottom:1.2rem;">
-                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(145deg,var(--brand-gold),var(--brand-green));display:grid;place-items:center;margin-bottom:0.8rem;">
-                    <i class="fas fa-leaf" style="color:#fff;font-size:1.4rem;"></i>
-                </div>
+                <img src="{{ asset('higalog.jpg') }}" alt="HigaGroup Logo" style="max-height:32px;width:auto;border-radius:6px;margin-bottom:0.8rem;display:block;">
                 <h1 style="margin:0;font-size:1.8rem;">Sign in</h1>
                 <p class="subtitle">Use your account to open the operations dashboard.</p>
             </div>
