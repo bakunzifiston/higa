@@ -55,7 +55,8 @@
                     <i class="fas fa-lock" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9ca3af;"></i>
                     <input id="password" type="password" name="password" placeholder="Password" required style="padding-right:44px;">
                     <button type="button" aria-label="Show password" onclick="togglePassword()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;color:#64748b;">
-                        <i id="togglePasswordIcon" class="fas fa-eye" style="position:relative;top:1px;"></i>
+                        <i id="togglePasswordIcon" class="fas fa-eye" style="position:absolute;left:0;top:0;"></i>
+
 
                     </button>
                 </div>
