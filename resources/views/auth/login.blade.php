@@ -14,7 +14,19 @@
     @endif
 </head>
 <body>
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon = document.getElementById('togglePasswordIcon');
+        if (!input || !icon) return;
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        icon.classList.toggle('fa-eye', !isHidden);
+        icon.classList.toggle('fa-eye-slash', isHidden);
+    }
+</script>
 <main class="layout" style="grid-template-columns:1fr;">
+
 <section class="right-panel" style="border-radius:14px;background:linear-gradient(160deg, #0b1220 0%, #111a2d 45%, #0f172a 100%);">
         <article class="login-card">
             <div style="margin-bottom:1.2rem;">
@@ -41,7 +53,10 @@
 
                 <div class="field" style="position:relative;">
                     <i class="fas fa-lock" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9ca3af;"></i>
-                    <input type="password" name="password" placeholder="Password" required>
+                    <input id="password" type="password" name="password" placeholder="Password" required style="padding-right:44px;">
+                    <button type="button" aria-label="Show password" onclick="togglePassword()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;color:#64748b;">
+                        <i id="togglePasswordIcon" class="fas fa-eye"></i>
+                    </button>
                 </div>
 
                 <div style="margin:0.45rem 0 0.7rem;font-size:0.9rem;color:#4b5563;">
@@ -49,6 +64,7 @@
                         <input type="checkbox" name="remember" value="1"> Remember me
                     </label>
                 </div>
+
 
                 <button class="login-btn" type="submit">
                     <i class="fas fa-sign-in-alt" style="margin-right:6px"></i> Login
