@@ -47,8 +47,9 @@
                 @endif
 
                 <div class="field" style="position:relative;">
-                    <i class="fas fa-envelope" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9ca3af;"></i>
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="Email Address" required>
+                    <i class="fas fa-envelope" style="position:absolute;left:14px;top:14px;color:#9ca3af;"></i>
+                    <input type="email" name="email" value="{{ old('email') }}" placeholder="Email Address" required style="padding-left:44px;">
+
                 </div>
 
                 <div class="field" style="position:relative;">
