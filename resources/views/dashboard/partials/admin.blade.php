@@ -2,26 +2,45 @@
     <div class="space-y-5 xl:col-span-2">
         <script>
         (function(){
-          const cb=document.getElementById('adminSupplierShow');
-          const box=document.getElementById('adminSupplierBox');
-          if(!cb||!box) return;
-          box.style.display = cb.checked ? '' : 'none';
-          cb.addEventListener('change', ()=>{
-            box.style.display = cb.checked ? '' : 'none';
-          });
+          // Collections toggle
+          const colCb=document.getElementById('adminCollectionsShow');
+          const colBox=document.getElementById('adminCollectionsBox');
+          if(colCb && colBox) {
+            colBox.style.display = colCb.checked ? '' : 'none';
+            colCb.addEventListener('change', ()=>{ colBox.style.display = colCb.checked ? '' : 'none'; });
+          }
+
+          // Sales toggle
+          const salesCb=document.getElementById('adminSalesShow');
+          const salesBox=document.getElementById('adminSalesBox');
+          if(salesCb && salesBox) {
+            salesBox.style.display = salesCb.checked ? '' : 'none';
+            salesCb.addEventListener('change', ()=>{ salesBox.style.display = salesCb.checked ? '' : 'none'; });
+          }
+
+          // Supplier toggle
+          const supCb=document.getElementById('adminSupplierShow');
+          const supBox=document.getElementById('adminSupplierBoxInner');
+          if(supCb && supBox) {
+            supBox.style.display = supCb.checked ? '' : 'none';
+            supCb.addEventListener('change', ()=>{ supBox.style.display = supCb.checked ? '' : 'none'; });
+          }
         })();
         </script>
+
 
 
         <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div class="flex items-center justify-between gap-3 mb-3">
                 <h3 class="text-sm font-semibold text-slate-800"><i class="fas fa-seedling mr-2 text-emerald-600"></i>Recent Maize Collections</h3>
                 <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
-                    <input type="checkbox" class="peer" id="adminCollectionsShow" checked />
+                    <input type="checkbox" class="peer" id="adminCollectionsShow" />
                     Show
                 </label>
             </div>
+
             <div class="overflow-auto rounded-xl border border-slate-200" id="adminCollectionsBox">
+
                 <table class="min-w-full text-sm">
                     <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                         <tr>
