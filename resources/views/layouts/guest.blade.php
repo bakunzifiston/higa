@@ -29,7 +29,7 @@
 </head>
 <body>
 
-<div class="login-card" style="max-width:420px;margin:0 auto;padding:28px;">
+<div class="login-card" style="max-width:420px;margin:24px auto 0 auto;padding:28px;">
     <div class="text-center mb-5">
         <div class="flex flex-col items-center">
             <div class="relative">
