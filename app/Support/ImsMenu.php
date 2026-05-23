@@ -12,6 +12,7 @@ class ImsMenu
         'collection-officer' => ['farmers', 'locations', 'collections', 'raw-inventory'],
         'production-manager' => ['raw-inventory', 'production', 'products', 'finished-inventory', 'expenses'],
         'sales-team' => ['sales', 'returns', 'payments', 'expenses'],
+        'hr' => ['employees'],
     ];
 
     /**
@@ -42,7 +43,19 @@ class ImsMenu
 
         $roleSlug = $user->role->slug;
         if ($roleSlug === 'admin') {
-            return collect($all)->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']])->values()->toArray();
+            // Admin should see the full menu. Inject missing modules that are not in $all.
+            $items = collect($all)->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']]);
+
+            if (! $items->contains('slug', 'employees')) {
+                $items->push([
+                    'slug' => 'employees',
+                    'label' => 'Employees',
+                    'endpoint' => route('modules.show', ['module' => 'employees']),
+                    'icon' => 'fa-solid fa-id-card',
+                ]);
+            }
+
+            return $items->values()->toArray();
         }
 
 // Get allowed modules for role
@@ -50,9 +63,6 @@ class ImsMenu
         if (!$allowed) {
             return collect($all)->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']])->values()->toArray();
         }
-
-        // Map slugs to include warehouses (locations)
-        $include = array_merge($allowed, ['warehouse' => 'locations']);
 
         return collect(array_filter($all, fn($item) => in_array($item['slug'], $allowed) || in_array($item['slug'], ['dashboard', 'profile'])))
             ->map(fn($item) => ['slug' => $item['slug'], 'label' => $item['label'], 'endpoint' => $item['href'], 'icon' => $item['icon']])

@@ -1,0 +1,2 @@
+Starting Employees module overwrite requires full file contents.
+Next: overwrite app/Http/Controllers/ModuleController.php and resources/views/modules/index.blade.php with employees CRUD + UI.

@@ -6,6 +6,7 @@ use App\Domain\Collections\Models\MaizeCollection;
 use App\Domain\Collections\Services\MaizeCollectionService;
 use App\Domain\Finance\Models\Payment;
 use App\Domain\Finance\Services\PaymentService;
+use App\Domain\Inventory\Models\Employee;
 use App\Domain\Inventory\Models\FinishedInventoryMovement;
 use App\Domain\Inventory\Models\Location;
 use App\Domain\Inventory\Models\Product;
@@ -62,7 +63,7 @@ class ModuleController extends Controller
 
     public function edit(string $module, int $id): View
     {
-        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
+        abort_unless(in_array($module, $this->allowedModules(), true), 404);
 
         [$stats, $menuItems] = $this->dashboardData($module);
 
@@ -71,6 +72,8 @@ class ModuleController extends Controller
             'locations' => Location::query()->findOrFail($id),
             'products' => Product::query()->findOrFail($id),
             'collections' => MaizeCollection::query()->findOrFail($id),
+            'employees' => \App\Models\Employee::query()->findOrFail($id),
+            default => null,
         };
 
         return view('modules.index', [
@@ -111,7 +114,7 @@ class ModuleController extends Controller
                     'village' => ['required', 'string', 'max:120'],
                     'is_active' => ['nullable', 'boolean'],
                 ])),
-'collections' => $this->maizeCollectionService->record($request->validate([
+                'collections' => $this->maizeCollectionService->record($request->validate([
                     'farmer_id' => ['required', 'integer', 'exists:farmers,id'],
                     'location_id' => ['required', 'integer', 'exists:locations,id'],
                     'product_name' => ['nullable', 'string', 'max:255'],
@@ -125,6 +128,23 @@ class ModuleController extends Controller
                     'name' => ['required', 'string', 'max:255', 'unique:products,name'],
                     'sku' => ['required', 'string', 'max:120', 'unique:products,sku'],
                     'is_active' => ['nullable', 'boolean'],
+                ])),
+                'employees' => \App\Models\Employee::query()->create($request->validate([
+                    'employee_code' => ['required', 'string', 'max:80', 'unique:employees,employee_code'],
+                    'full_name' => ['required', 'string', 'max:255'],
+                    'gender' => ['nullable', 'string', 'max:20'],
+                    'date_of_birth' => ['nullable', 'date'],
+                    'nationality' => ['nullable', 'string', 'max:80'],
+                    'disability_status' => ['nullable', 'string', 'max:50'],
+                    'phone_number' => ['nullable', 'string', 'max:40'],
+                    'email' => ['nullable', 'email', 'max:255'],
+                    'address' => ['nullable', 'string', 'max:500'],
+                    'department' => ['nullable', 'string', 'max:120'],
+                    'position' => ['nullable', 'string', 'max:120'],
+                    'employment_type' => ['nullable', 'string', 'max:80'],
+                    'hire_date' => ['nullable', 'date'],
+                    'work_location' => ['nullable', 'string', 'max:120'],
+                    'status' => ['nullable', 'string', 'max:50'],
                 ])),
                 'production' => $this->createProductionBatch($request),
                 'sales' => $this->createSale($request),
@@ -159,7 +179,7 @@ class ModuleController extends Controller
 
     public function update(Request $request, string $module, int $id): RedirectResponse
     {
-        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
+        abort_unless(in_array($module, $this->allowedModules(), true), 404);
 
         match ($module) {
             'farmers' => Farmer::query()->findOrFail($id)->update($request->validate([
@@ -197,6 +217,24 @@ class ModuleController extends Controller
                 'rejection_reason' => ['nullable', 'string'],
                 'price_per_kg' => ['required', 'numeric', 'gt:0'],
             ])),
+            'employees' => \App\Models\Employee::query()->findOrFail($id)->update($request->validate([
+                'employee_code' => ['required', 'string', 'max:80', Rule::unique('employees', 'employee_code')->ignore($id)],
+                'full_name' => ['required', 'string', 'max:255'],
+                'gender' => ['nullable', 'string', 'max:20'],
+                'date_of_birth' => ['nullable', 'date'],
+                'nationality' => ['nullable', 'string', 'max:80'],
+                'disability_status' => ['nullable', 'string', 'max:50'],
+                'phone_number' => ['nullable', 'string', 'max:40'],
+                'email' => ['nullable', 'email', 'max:255'],
+                'address' => ['nullable', 'string', 'max:500'],
+                'department' => ['nullable', 'string', 'max:120'],
+                'position' => ['nullable', 'string', 'max:120'],
+                'employment_type' => ['nullable', 'string', 'max:80'],
+                'hire_date' => ['nullable', 'date'],
+                'work_location' => ['nullable', 'string', 'max:120'],
+                'status' => ['nullable', 'string', 'max:50'],
+            ])),
+            default => null,
         };
 
         return redirect()->route('modules.show', ['module' => $module])->with('success', 'Record updated.');
@@ -204,13 +242,15 @@ class ModuleController extends Controller
 
     public function destroy(string $module, int $id): RedirectResponse
     {
-        abort_unless(in_array($module, ['farmers', 'locations', 'products', 'collections'], true), 404);
+        abort_unless(in_array($module, $this->allowedModules(), true), 404);
 
         match ($module) {
             'farmers' => Farmer::query()->findOrFail($id)->delete(),
             'locations' => Location::query()->findOrFail($id)->delete(),
             'products' => Product::query()->findOrFail($id)->delete(),
             'collections' => MaizeCollection::query()->findOrFail($id)->delete(),
+            'employees' => \App\Models\Employee::query()->findOrFail($id)->delete(),
+            default => null,
         };
 
         return redirect()->route('modules.show', ['module' => $module])->with('success', 'Record deleted.');
@@ -274,20 +314,39 @@ class ModuleController extends Controller
     private function recordsForModule(string $module): mixed
     {
         return match ($module) {
+
+
+
+
+
+
+
             'farmers' => Farmer::query()->latest()->paginate(15),
-            'locations' => Location::query()->latest()->paginate(15),
+            'locations' => Location::query()->where('is_active', true)->latest()->paginate(15),
+
             'collections' => MaizeCollection::query()->with(['farmer', 'location'])->latest('collection_date')->paginate(15),
-'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection', 'productionBatch'])->latest('movement_date')->paginate(20),
-        'production' => ProductionBatch::query()
-            ->with(['location', 'outputs.product', 'outputs.package', 'expenses', 'wastage'])
-            ->latest('production_date')
-            ->paginate(15),
-            'products' => Product::query()->latest()->paginate(15),
-            'finished-inventory' => $this->finishedInventoryStock(),
-            'sales' => Sale::query()->with('items')->latest('sale_date')->paginate(15),
-            'returns' => SaleReturn::query()->with(['sale', 'saleItem'])->latest('return_date')->paginate(15),
-            'expenses' => BatchExpense::query()->with('batch')->latest()->paginate(20),
-            'payments' => Payment::query()->with('sale')->latest('payment_date')->paginate(20),
+
+            'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection', 'productionBatch'])->latest('movement_date')->paginate(20),
+
+
+            'production' => ProductionBatch::query()
+                ->with(['location', 'outputs.product', 'outputs.package', 'expenses', 'wastage'])
+                ->latest('production_date')
+                ->get(),
+
+            'products' => Product::query()->latest()->get(),
+
+            'finished-inventory' => $this->finishedInventoryStock()->getCollection(),
+
+            'sales' => Sale::query()->with('items')->latest('sale_date')->get(),
+
+            'returns' => SaleReturn::query()->with(['sale', 'saleItem'])->latest('return_date')->get(),
+
+            'expenses' => BatchExpense::query()->with('batch')->latest()->get(),
+            'payments' => Payment::query()->with('sale')->latest('payment_date')->get(),
+
+            'employees' => \App\Models\Employee::query()->latest()->get(),
+
             default => collect(),
         };
     }
@@ -337,7 +396,7 @@ class ModuleController extends Controller
         ];
     }
 
-private function dashboardData(string $activeModule): array
+    private function dashboardData(string $activeModule): array
     {
         $counts = DB::select("
             SELECT
@@ -352,11 +411,18 @@ private function dashboardData(string $activeModule): array
 
         $menuItems = ImsMenu::moduleNav(auth()->user());
 
-        // Add users menu for admins
         if (auth()->check() && auth()->user()->isAdmin()) {
             $hasUsers = collect($menuItems)->contains('slug', 'users');
             if (!$hasUsers) {
                 $menuItems[] = ['slug' => 'users', 'label' => 'Users', 'endpoint' => route('users.index'), 'icon' => 'fa-users'];
+            }
+        }
+
+        // Ensure employees module appears for admins even if menu config lags
+        if (auth()->check() && auth()->user()->isAdmin()) {
+            $hasEmployees = collect($menuItems)->contains('slug', 'employees');
+            if (!$hasEmployees) {
+                $menuItems[] = ['slug' => 'employees', 'label' => 'Employees', 'endpoint' => route('modules.show', ['module' => 'employees']), 'icon' => 'fa-id-card'];
             }
         }
 
@@ -365,12 +431,10 @@ private function dashboardData(string $activeModule): array
 
     private function allowedModules(): array
     {
-        // If not logged in, no modules
         if (!auth()->check()) {
             return [];
         }
 
-        // Admin gets all modules
         $user = auth()->user();
         if ($user->isAdmin()) {
             return [
@@ -385,10 +449,11 @@ private function dashboardData(string $activeModule): array
                 'returns',
                 'expenses',
                 'payments',
+                'employees',
             ];
         }
 
-        // Get allowed modules for role using ImsMenu
         return array_column(ImsMenu::moduleNav($user), 'slug');
     }
 }
+
