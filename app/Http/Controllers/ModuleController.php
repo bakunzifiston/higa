@@ -326,7 +326,7 @@ class ModuleController extends Controller
 
             'collections' => MaizeCollection::query()->with(['farmer', 'location'])->latest('collection_date')->paginate(15),
 
-            'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection', 'productionBatch'])->latest('movement_date')->paginate(20),
+            'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection.farmer', 'productionBatch'])->latest('movement_date')->paginate(20),
 
 
             'production' => ProductionBatch::query()

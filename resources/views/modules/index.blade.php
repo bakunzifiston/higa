@@ -904,6 +904,28 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                             <tr>
                                 <th>Name</th><th>SKU</th><th>Status</th><th>Created</th><th>Actions</th>
                             </tr>
+                        @elseif($module === 'raw-inventory')
+                            <tr>
+                                <th>#</th>
+                                <th>Type</th>
+                                <th>Source</th>
+                                <th>Quantity (kg)</th>
+                                <th>Warehouse</th>
+                                <th>Reference</th>
+                                <th>Movement Date</th>
+                            </tr>
+                        @elseif($module === 'production')
+                            <tr>
+                                <th>Batch #</th>
+                                <th>Production Date</th>
+                                <th>Warehouse</th>
+                                <th>Maize Used (kg)</th>
+                                <th>Qty Produced</th>
+                                <th>Wastage (kg)</th>
+                                <th>Quality %</th>
+                                <th>Products Out</th>
+                                <th>Expenses</th>
+                            </tr>
                         @else
                             <tr><th>Info</th><th>Date</th></tr>
                         @endif
@@ -1030,6 +1052,78 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                     </td>
                                 </tr>
 
+                            @elseif($module === 'raw-inventory')
+                                <tr>
+                                    <td>{{ $record->id }}</td>
+                                    <td>
+                                        @if($record->type === 'IN')
+                                            <span class="status-badge active">IN</span>
+                                        @else
+                                            <span class="status-badge inactive">OUT</span>
+                                        @endif
+                                    </td>
+                                    <td style="text-transform:capitalize">{{ $record->source ?? '-' }}</td>
+                                    <td>{{ number_format($record->quantity, 3) }} kg</td>
+                                    <td>{{ $record->location?->name ?? '-' }}</td>
+                                    <td>
+                                        @if($record->source === 'collection' && $record->collection)
+                                            <div class="sub" style="font-size:.82rem">
+                                                Collection #{{ $record->collection->id }}<br>
+                                                @php $farmerName = optional(optional($record->collection)->farmer)->name ?? '-'; @endphp
+                                                {{ $farmerName }}
+                                            </div>
+                                        @elseif($record->source === 'production' && $record->productionBatch)
+                                            <div class="sub" style="font-size:.82rem">
+                                                Batch: {{ $record->productionBatch->batch_number ?? $record->reference_id }}
+                                            </div>
+                                        @else
+                                            Ref #{{ $record->reference_id }}
+                                        @endif
+                                    </td>
+                                    <td>{{ $record->movement_date ? \Carbon\Carbon::parse($record->movement_date)->format('Y-m-d H:i') : '-' }}</td>
+                                </tr>
+                            @elseif($module === 'production')
+                                <tr>
+                                    <td>
+                                        <strong>{{ $record->batch_number }}</strong>
+                                        <div class="sub">#{{ $record->id }}</div>
+                                    </td>
+                                    <td>{{ $record->production_date ? \Carbon\Carbon::parse($record->production_date)->format('Y-m-d') : '-' }}</td>
+                                    <td>{{ $record->location?->name ?? '-' }}</td>
+                                    <td>{{ number_format($record->maize_used ?? 0, 2) }} kg</td>
+                                    <td>{{ number_format($record->quantity_produced ?? 0, 2) }}</td>
+                                    <td>{{ number_format($record->wastage_quantity ?? 0, 2) }} kg</td>
+                                    <td>
+                                        @php $q = $record->quality_percentage ?? null; @endphp
+                                        @if($q !== null)
+                                            <span style="font-weight:600;color:{{ $q >= 80 ? '#166534' : ($q >= 60 ? '#92400e' : '#991b1b') }}">
+                                                {{ $q }}%
+                                            </span>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @forelse($record->outputs ?? [] as $out)
+                                            <div class="sub">
+                                                {{ $out->product?->name ?? '-' }}
+                                                @if($out->package) &middot; {{ $out->package->name }} @endif
+                                                &middot; {{ number_format($out->quantity ?? 0, 2) }}
+                                            </div>
+                                        @empty
+                                            -
+                                        @endforelse
+                                    </td>
+                                    <td>
+                                        @php $totalExp = ($record->expenses ?? collect())->sum('amount'); @endphp
+                                        @if($totalExp > 0)
+                                            {{ number_format($totalExp, 2) }} RWF
+                                            <div class="sub">{{ ($record->expenses ?? collect())->count() }} item(s)</div>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                </tr>
                             @else
                                 <tr>
                                     <td>{{ $record->id ?? '-' }}</td>
