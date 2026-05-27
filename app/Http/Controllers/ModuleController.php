@@ -259,9 +259,11 @@ class ModuleController extends Controller
     private function createProductionBatch(Request $request): void
     {
         $data = $request->validate([
-            'batch_number' => ['required', 'string', 'max:100', 'unique:production_batches,batch_number'],
+            'batch_number' => ['nullable', 'string', 'max:100'],
+            'collection_id' => ['required', 'integer', 'exists:maize_collections,id'],
             'location_id' => ['required', 'integer', 'exists:locations,id'],
             'maize_used' => ['required', 'numeric', 'gt:0'],
+
             'quantity_produced' => ['required', 'numeric', 'gt:0'],
             'wastage_quantity' => ['required', 'numeric', 'gte:0'],
             'quality_percentage' => ['required', 'numeric', 'between:0,100'],
@@ -325,6 +327,7 @@ class ModuleController extends Controller
             'locations' => Location::query()->where('is_active', true)->latest()->paginate(15),
 
             'collections' => MaizeCollection::query()->with(['farmer', 'location'])->latest('collection_date')->paginate(15),
+<<<<<<< Updated upstream
 
             'raw-inventory' => RawInventoryMovement::query()->with(['location', 'collection.farmer', 'productionBatch'])->latest('movement_date')->paginate(20),
 
@@ -346,14 +349,34 @@ class ModuleController extends Controller
             'payments' => Payment::query()->with('sale')->latest('payment_date')->get(),
 
             'employees' => \App\Models\Employee::query()->latest()->get(),
+=======
+            'raw-inventory' => RawInventoryMovement::query()
+                ->with(['location', 'collection', 'collectionByReference', 'productionBatch'])
+                ->latest('movement_date')
+                ->paginate(20),
+            'production' => ProductionBatch::query()
+                ->with(['location', 'outputs.product', 'outputs.package', 'expenses', 'wastage'])
+                ->latest('production_date')
+                ->paginate(15),
+            'products' => Product::query()->orderBy('name')->paginate(20),
+
+            'finished-inventory' => $this->finishedInventoryStock(),
+            'sales' => Sale::query()->with('items')->latest('sale_date')->paginate(15),
+            'returns' => SaleReturn::query()->with(['sale', 'saleItem'])->latest('return_date')->paginate(15),
+            'expenses' => BatchExpense::query()->with('batch')->latest()->paginate(20),
+            'payments' => Payment::query()->with('sale')->latest('payment_date')->paginate(20),
+>>>>>>> Stashed changes
 
             default => collect(),
         };
     }
 
+
+
     private function finishedInventoryStock(): mixed
     {
         $stocks = FinishedInventoryMovement::query()
+
             ->selectRaw('
                 product_id,
                 location_id,
@@ -389,6 +412,22 @@ class ModuleController extends Controller
             'locations' => Location::query()->orderBy('name')->get(['id', 'name']),
             'products' => Product::query()->orderBy('name')->get(['id', 'name']),
             'packages' => ProductPackage::query()->orderBy('name')->get(['id', 'name', 'product_id']),
+
+            // Employees UI (dropdowns)
+            'employees_departments' => [
+                'Production',
+                'Operations',
+                'Finance',
+                'Sales',
+                'Logistics',
+                'HR',
+            ],
+
+            // For Production UI: consume from the oldest remaining collections (FIFO)
+            'collections_for_production' => MaizeCollection::query()
+                ->orderBy('collection_date')
+                ->orderBy('id')
+                ->get(['id', 'collection_date', 'accepted_quantity']),
             'batches' => ProductionBatch::query()->orderByDesc('production_date')->get(['id', 'batch_number', 'location_id']),
             'sales' => Sale::query()->orderByDesc('sale_date')->get(['id', 'invoice_number']),
             'sale_items' => SaleItem::query()->orderByDesc('id')->get(['id', 'sale_id', 'product_id', 'quantity']),
@@ -396,7 +435,12 @@ class ModuleController extends Controller
         ];
     }
 
+<<<<<<< Updated upstream
     private function dashboardData(string $activeModule): array
+=======
+
+private function dashboardData(string $activeModule): array
+>>>>>>> Stashed changes
     {
         $counts = DB::select("
             SELECT
@@ -453,6 +497,11 @@ class ModuleController extends Controller
             ];
         }
 
+<<<<<<< Updated upstream
+=======
+
+        // Get allowed modules for role using ImsMenu
+>>>>>>> Stashed changes
         return array_column(ImsMenu::moduleNav($user), 'slug');
     }
 }

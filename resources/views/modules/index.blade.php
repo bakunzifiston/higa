@@ -573,6 +573,7 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                     ════════════════════════════════ --}}
                     @elseif($module === 'employees')
                         @php
+<<<<<<< Updated upstream
                             /* ── Exact positions at Higa Group ── */
                             $empPositions = [
                                 'General Manager',
@@ -809,6 +810,610 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                 @endforeach
                             </select>
                         </div>
+=======
+                            /* ── Positions (for UI dropdown) ── */
+                            $empPositions = [
+                                'Manager',
+                                'Storekeeper',
+                                'Accountant',
+                                'Cashier',
+                                'Supervisor',
+                                'Driver',
+                                'Staff',
+                            ];
+
+                            /* ── Employment types (for UI dropdown) ── */
+                            $empEmpTypes = [
+                                'Full-time',
+                                'Part-time',
+                                'Contract',
+                                'Temporary',
+                            ];
+
+                            /* ── Genders ── */
+                            $empGenders = ['Male', 'Female', 'Other'];
+
+                            /* ── Nationalities (for UI dropdown) ── */
+                            $empNationalities = [
+                                'Rwandan',
+                                'Ugandan',
+                                'Kenyan',
+                                'Tanzanian',
+                                'Burundian',
+                            ];
+
+                            /* ── Disability (for UI dropdown) ── */
+                            $empDisability = ['Yes', 'No'];
+
+                            /* ── Statuses (for UI dropdown) ── */
+                            $empStatuses = ['Active', 'Inactive', 'Suspended', 'Resigned'];
+
+
+                            /* ── Work locations: pulled from lookupData() passed by the controller ── */
+                            $warehouseList = $lookups['locations'] ?? collect();
+                        @endphp
+
+                        {{-- Row 1: Code + Full Name --}}
+                        <div>
+                            <label><i class="fas fa-id-card"></i> Employee Code</label>
+                            <input name="employee_code"
+                                   value="{{ old('employee_code', $editRecord?->employee_code ?? '') }}"
+                                   placeholder="e.g. HG-0042" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-user"></i> Full Name</label>
+                            <input name="full_name"
+                                   value="{{ old('full_name', $editRecord?->full_name ?? '') }}"
+                                   placeholder="First and last name" required>
+                        </div>
+
+                        {{-- Row 2: Gender + DOB --}}
+                        <div>
+                            <label><i class="fas fa-venus-mars"></i> Gender</label>
+                            <select name="gender" required>
+                                <option value="">— Select gender —</option>
+                                @foreach($empGenders as $opt)
+                                    <option value="{{ $opt }}"
+                                        {{ old('gender', $editRecord?->gender) === $opt ? 'selected' : '' }}>
+                                        {{ $opt }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-birthday-cake"></i> Date of Birth</label>
+                            <input type="date" name="date_of_birth"
+                                   value="{{ old('date_of_birth', $editRecord?->date_of_birth
+                                       ? \Carbon\Carbon::parse($editRecord->date_of_birth)->format('Y-m-d')
+                                       : '') }}">
+                        </div>
+
+                        {{-- Row 3: Nationality + Disability --}}
+                        <div>
+                            <label><i class="fas fa-flag"></i> Nationality</label>
+                            <select name="nationality" id="nationality-select">
+                                <option value="">— Select nationality —</option>
+                                @foreach($empNationalities as $opt)
+                                    <option value="{{ $opt }}"
+                                        {{ old('nationality', $editRecord?->nationality) === $opt ? 'selected' : '' }}>
+                                        {{ $opt }}
+                                    </option>
+                                @endforeach
+                                {{-- "Other" lets staff type a custom value --}}
+                                <option value="Other"
+                                    {{ old('nationality', $editRecord?->nationality) === 'Other' ? 'selected' : '' }}>
+                                    Other
+                                </option>
+                            </select>
+                        </div>
+                        {{-- Shown only when Other is picked --}}
+                        <div id="nationality-other-wrap">
+                            <label><i class="fas fa-pencil-alt"></i> Specify Nationality</label>
+                            <input name="nationality_other" id="nationality-other-input"
+                                   value="{{ old('nationality_other', '') }}"
+                                   placeholder="e.g. Ethiopian">
+                        </div>
+
+                        <div>
+                            <label><i class="fas fa-wheelchair"></i> Disability Status</label>
+                            <select name="disability_status">
+                                <option value="">— Select —</option>
+                                @foreach($empDisability as $opt)
+                                    <option value="{{ $opt }}"
+                                        {{ old('disability_status', $editRecord?->disability_status) === $opt ? 'selected' : '' }}>
+                                        {{ $opt }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Row 4: Phone + Email --}}
+                        <div>
+                            <label><i class="fas fa-phone"></i> Phone Number</label>
+                            <input name="phone_number"
+                                   value="{{ old('phone_number', $editRecord?->phone_number ?? '') }}"
+                                   placeholder="+250 7XX XXX XXX">
+                        </div>
+                        <div>
+                            <label><i class="fas fa-envelope"></i> Email</label>
+                            <input name="email" type="email"
+                                   value="{{ old('email', $editRecord?->email ?? '') }}"
+                                   placeholder="employee@higagroup.rw">
+                        </div>
+
+                        {{-- Address: full width --}}
+                        <div class="full">
+                            <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                            <input name="address"
+                                   value="{{ old('address', $editRecord?->address ?? '') }}"
+                                   placeholder="District, Province, Rwanda">
+                        </div>
+
+                        {{-- Row 5: Department + Position --}}
+                        <div>
+                            <label><i class="fas fa-building"></i> Department</label>
+                            <select name="department" required>
+                                <option value="">— Select department —</option>
+                            @foreach(($empDepts ?? $lookups['employees_departments'] ?? []) as $opt)
+                                    <option value="{{ $opt }}"
+                                        {{ old('department', $editRecord?->department) === $opt ? 'selected' : '' }}>
+                                        {{ $opt }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-briefcase"></i> Position</label>
+                            <select name="position" required>
+                                <option value="">— Select position —</option>
+                                @foreach($empPositions as $opt)
+                                    <option value="{{ $opt }}"
+                                        {{ old('position', $editRecord?->position) === $opt ? 'selected' : '' }}>
+                                        {{ $opt }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Row 6: Employment Type + Hire Date --}}
+                        <div>
+                            <label><i class="fas fa-user-tie"></i> Employment Type</label>
+                            <select name="employment_type" required>
+                                <option value="">— Select type —</option>
+                                @foreach($empEmpTypes as $opt)
+                                    <option value="{{ $opt }}"
+                                        {{ old('employment_type', $editRecord?->employment_type) === $opt ? 'selected' : '' }}>
+                                        {{ $opt }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-calendar-alt"></i> Hire Date</label>
+                            <input type="date" name="hire_date"
+                                   value="{{ old('hire_date', $editRecord?->hire_date
+                                       ? \Carbon\Carbon::parse($editRecord->hire_date)->format('Y-m-d')
+                                       : '') }}">
+                        </div>
+
+                        {{-- Row 7: Work Location (dynamic) + Status --}}
+                        <div>
+                            <label><i class="fas fa-warehouse"></i> Work Location</label>
+                            <select name="work_location" required>
+                                <option value="">— Select warehouse —</option>
+                                @forelse($warehouseList as $warehouse)
+                                    <option value="{{ $warehouse->name }}"
+                                        {{ old('work_location', $editRecord?->work_location) === $warehouse->name ? 'selected' : '' }}>
+                                        {{ $warehouse->name }}
+                                        @if($warehouse->code) ({{ $warehouse->code }}) @endif
+                                    </option>
+                                @empty
+                                    <option value="" disabled>No warehouses found — add one in Locations</option>
+                                @endforelse
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-circle"></i> Status</label>
+                            <select name="status" required>
+                                <option value="">— Select status —</option>
+                                @foreach($empStatuses as $opt)
+                                    <option value="{{ $opt }}"
+                                        {{ old('status', $editRecord?->status ?? 'Active') === $opt ? 'selected' : '' }}>
+                                        {{ $opt }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                    {{-- ════════════════════════════════
+                         PRODUCTION
+                    ════════════════════════════════ --}}
+                    @elseif($module === 'production')
+                        @php
+                            $prodLocations = $lookups['locations'] ?? collect();
+                            $prodProducts  = $lookups['products']  ?? collect();
+                            $prodPackages  = $lookups['packages']  ?? collect();
+                        @endphp
+
+                        {{-- Production Date + Select collection as input source --}}
+                        <div>
+                            <label><i class="fas fa-calendar-alt"></i> Production Date</label>
+                            <input type="date" name="production_date"
+                                   value="{{ old('production_date', $editRecord?->production_date
+                                       ? \Carbon\Carbon::parse($editRecord->production_date)->format('Y-m-d')
+                                       : ($lookups['today'] ?? '')) }}" required>
+                        </div>
+
+                        {{-- Warehouse --}}
+                        <div>
+                            <label><i class="fas fa-warehouse"></i> Warehouse</label>
+                            <select name="location_id" required>
+                                <option value="">— Select warehouse —</option>
+                                @foreach($prodLocations as $loc)
+                                    <option value="{{ $loc->id }}"
+                                        {{ old('location_id', $editRecord?->location_id) == $loc->id ? 'selected' : '' }}>
+                                        {{ $loc->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Select collection batch instead of typing --}}
+                        <div>
+                            <label><i class="fas fa-layer-group"></i> Use Collection (oldest FIFO)</label>
+                            <select name="collection_id" required>
+                                <option value="">— Select collection —</option>
+                                @foreach(($lookups['collections_for_production'] ?? collect()) as $col)
+                                    <option value="{{ $col->id }}"
+                                        {{ old('collection_id', $editRecord?->collection_id ?? '') == $col->id ? 'selected' : '' }}>
+                                        #{{ $col->id }} · {{ optional($col->collection_date)->format('Y-m-d') ?? '-' }} · {{ $col->accepted_quantity ?? 0 }} kg
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="sub">System will consume maize FIFO from the oldest remaining collections (starting from this one).</div>
+                        </div>
+
+                        {{-- Maize Used + Qty Produced --}}
+                        <div>
+                            <label><i class="fas fa-weight"></i> Maize Used (kg)</label>
+                            <input type="number" step="0.001" min="0" name="maize_used"
+                                   value="{{ old('maize_used', $editRecord?->maize_used ?? '') }}"
+                                   placeholder="0.000" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-box"></i> Quantity Produced</label>
+                            <input type="number" step="0.001" min="0" name="quantity_produced"
+                                   value="{{ old('quantity_produced', $editRecord?->quantity_produced ?? '') }}"
+                                   placeholder="0.000" required>
+                        </div>
+
+
+                        {{-- Wastage + Quality --}}
+                        <div>
+                            <label><i class="fas fa-trash-alt"></i> Wastage (kg)</label>
+                            <input type="number" step="0.001" min="0" name="wastage_quantity"
+                                   value="{{ old('wastage_quantity', $editRecord?->wastage_quantity ?? '0') }}"
+                                   placeholder="0.000" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-percent"></i> Quality %</label>
+                            <input type="number" step="0.01" min="0" max="100" name="quality_percentage"
+                                   value="{{ old('quality_percentage', $editRecord?->quality_percentage ?? '') }}"
+                                   placeholder="0 – 100" required>
+                        </div>
+
+                        {{-- Product + Package --}}
+                        <div>
+                            <label><i class="fas fa-seedling"></i> Product</label>
+                            <select name="product_id" id="prod-product-select" required>
+                                <option value="">— Select product —</option>
+                                @foreach($prodProducts as $prod)
+                                    <option value="{{ $prod->id }}"
+                                        {{ old('product_id', $editRecord?->outputs->first()?->product_id) == $prod->id ? 'selected' : '' }}>
+                                        {{ $prod->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-cube"></i> Package</label>
+                            <select name="product_package_id" id="prod-package-select" required>
+                                <option value="">— Select package —</option>
+                                @foreach($prodPackages as $pkg)
+                                    <option value="{{ $pkg->id }}"
+                                            data-product="{{ $pkg->product_id }}"
+                                        {{ old('product_package_id', $editRecord?->outputs->first()?->product_package_id) == $pkg->id ? 'selected' : '' }}>
+                                        {{ $pkg->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Wastage Reason: full width --}}
+                        <div class="full">
+                            <label><i class="fas fa-comment-alt"></i> Wastage Reason <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                            <input name="wastage_reason"
+                                   value="{{ old('wastage_reason', $editRecord?->wastage_reason ?? '') }}"
+                                   placeholder="e.g. Moisture damage">
+                        </div>
+
+                    {{-- ════════════════════════════════
+                         COLLECTIONS
+                    ════════════════════════════════ --}}
+                    @elseif($module === 'collections')
+                        @php
+                            $colFarmers   = $lookups['farmers']   ?? collect();
+                            $colLocations = $lookups['locations']  ?? collect();
+                        @endphp
+                        <div>
+                            <label><i class="fas fa-user"></i> Farmer</label>
+                            <select name="farmer_id" required>
+                                <option value="">— Select farmer —</option>
+                                @foreach($colFarmers as $f)
+                                    <option value="{{ $f->id }}" {{ old('farmer_id', $editRecord?->farmer_id) == $f->id ? 'selected' : '' }}>{{ $f->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-warehouse"></i> Location</label>
+                            <select name="location_id" required>
+                                <option value="">— Select location —</option>
+                                @foreach($colLocations as $loc)
+                                    <option value="{{ $loc->id }}" {{ old('location_id', $editRecord?->location_id) == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-seedling"></i> Product Name</label>
+                            <input name="product_name" value="{{ old('product_name', $editRecord?->product_name ?? '') }}" placeholder="e.g. Maize">
+                        </div>
+                        <div>
+                            <label><i class="fas fa-calendar-alt"></i> Collection Date</label>
+                            <input type="date" name="collection_date" value="{{ old('collection_date', $editRecord?->collection_date ? \Carbon\Carbon::parse($editRecord->collection_date)->format('Y-m-d') : ($lookups['today'] ?? '')) }}" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-weight"></i> Qty Collected (kg)</label>
+                            <input type="number" step="0.001" min="0" name="quantity_collected" value="{{ old('quantity_collected', $editRecord?->quantity_collected ?? '') }}" placeholder="0.000" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-check-circle"></i> Qty Rejected (kg)</label>
+                            <input type="number" step="0.001" min="0" name="quantity_rejected" value="{{ old('quantity_rejected', $editRecord?->quantity_rejected ?? '0') }}" placeholder="0.000">
+                        </div>
+                        <div>
+                            <label><i class="fas fa-coins"></i> Price / kg (RWF)</label>
+                            <input type="number" step="0.01" min="0" name="price_per_kg" value="{{ old('price_per_kg', $editRecord?->price_per_kg ?? '') }}" placeholder="0.00" required>
+                        </div>
+                        <div class="full">
+                            <label><i class="fas fa-comment-alt"></i> Rejection Reason <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                            <input name="rejection_reason" value="{{ old('rejection_reason', $editRecord?->rejection_reason ?? '') }}" placeholder="e.g. Moisture damage">
+                        </div>
+                        <div class="full">
+                            <label><i class="fas fa-sticky-note"></i> Notes <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                            <textarea name="notes" rows="3" placeholder="e.g. Batch condition, storage details">{{ old('notes', $editRecord?->notes ?? '') }}</textarea>
+                        </div>
+
+
+                    {{-- ════════════════════════════════
+                         PRODUCTS
+                    ════════════════════════════════ --}}
+                    @elseif($module === 'products')
+                        <div>
+                            <label><i class="fas fa-tag"></i> Product Name</label>
+                            <input name="name" value="{{ old('name', $editRecord?->name ?? '') }}" placeholder="e.g. Maize Flour" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-barcode"></i> SKU</label>
+                            <input name="sku" value="{{ old('sku', $editRecord?->sku ?? '') }}" placeholder="e.g. MF-001" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-toggle-on"></i> Status</label>
+                            <select name="is_active">
+                                <option value="1" {{ old('is_active', $editRecord?->is_active ?? 1) == 1 ? 'selected' : '' }}>Active</option>
+                                <option value="0" {{ old('is_active', $editRecord?->is_active ?? 1) == 0 ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        </div>
+
+                    {{-- ════════════════════════════════
+                         SALES
+                    ════════════════════════════════ --}}
+                    @elseif($module === 'sales')
+                        @php
+                            $saleLocations = $lookups['locations'] ?? collect();
+                            $saleProducts  = $lookups['products']  ?? collect();
+                            $salePackages  = $lookups['packages']  ?? collect();
+                            $saleBatches   = $lookups['batches']   ?? collect();
+                        @endphp
+                        <div>
+                            <label><i class="fas fa-file-invoice"></i> Invoice Number</label>
+                            <input name="invoice_number" value="{{ old('invoice_number', $editRecord?->invoice_number ?? '') }}" placeholder="e.g. INV-2026-001" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-user"></i> Customer Name</label>
+                            <input name="customer_name" value="{{ old('customer_name', $editRecord?->customer_name ?? '') }}" placeholder="Full name" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-phone"></i> Customer Phone</label>
+                            <input name="customer_phone" value="{{ old('customer_phone', $editRecord?->customer_phone ?? '') }}" placeholder="+250 7XX XXX XXX">
+                        </div>
+                        <div>
+                            <label><i class="fas fa-calendar-alt"></i> Sale Date</label>
+                            <input type="date" name="sale_date" value="{{ old('sale_date', $editRecord?->sale_date ? \Carbon\Carbon::parse($editRecord->sale_date)->format('Y-m-d') : ($lookups['today'] ?? '')) }}" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-warehouse"></i> Warehouse</label>
+                            <select name="location_id" required>
+                                <option value="">— Select warehouse —</option>
+                                @foreach($saleLocations as $loc)
+                                    <option value="{{ $loc->id }}" {{ old('location_id', $editRecord?->location_id) == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-credit-card"></i> Payment Method</label>
+                            <select name="payment_method" required>
+                                <option value="">— Select —</option>
+                                @foreach(['cash' => 'Cash', 'mobile_money' => 'Mobile Money', 'bank_transfer' => 'Bank Transfer', 'credit' => 'Credit'] as $val => $label)
+                                    <option value="{{ $val }}" {{ old('payment_method', $editRecord?->payment_method) === $val ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-truck"></i> Delivery Status</label>
+                            <select name="delivery_status" required>
+                                <option value="">— Select —</option>
+                                @foreach(['pending' => 'Pending', 'in_transit' => 'In Transit', 'delivered' => 'Delivered'] as $val => $label)
+                                    <option value="{{ $val }}" {{ old('delivery_status', $editRecord?->delivery_status) === $val ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-seedling"></i> Product</label>
+                            <select name="product_id" id="sale-product-select" required>
+                                <option value="">— Select product —</option>
+                                @foreach($saleProducts as $prod)
+                                    <option value="{{ $prod->id }}" {{ old('product_id') == $prod->id ? 'selected' : '' }}>{{ $prod->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-cube"></i> Package</label>
+                            <select name="product_package_id" id="sale-package-select" required>
+                                <option value="">— Select package —</option>
+                                @foreach($salePackages as $pkg)
+                                    <option value="{{ $pkg->id }}" data-product="{{ $pkg->product_id }}" {{ old('product_package_id') == $pkg->id ? 'selected' : '' }}>{{ $pkg->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-industry"></i> Production Batch <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                            <select name="production_batch_id">
+                                <option value="">— None —</option>
+                                @foreach($saleBatches as $batch)
+                                    <option value="{{ $batch->id }}" {{ old('production_batch_id') == $batch->id ? 'selected' : '' }}>{{ $batch->batch_number }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-sort-numeric-up"></i> Quantity</label>
+                            <input type="number" step="0.001" min="0" name="quantity" value="{{ old('quantity', '') }}" placeholder="0.000" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-coins"></i> Unit Price (RWF)</label>
+                            <input type="number" step="0.01" min="0" name="price" value="{{ old('price', '') }}" placeholder="0.00" required>
+                        </div>
+                        <div class="full">
+                            <label><i class="fas fa-map-marker-alt"></i> Customer Address <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                            <input name="customer_address" value="{{ old('customer_address', $editRecord?->customer_address ?? '') }}" placeholder="District, Province">
+                        </div>
+
+                    {{-- ════════════════════════════════
+                         RETURNS
+                    ════════════════════════════════ --}}
+                    @elseif($module === 'returns')
+                        @php
+                            $retSales     = $lookups['sales']      ?? collect();
+                            $retSaleItems = $lookups['sale_items']  ?? collect();
+                        @endphp
+                        <div>
+                            <label><i class="fas fa-file-invoice"></i> Sale</label>
+                            <select name="sale_id" required>
+                                <option value="">— Select sale —</option>
+                                @foreach($retSales as $sale)
+                                    <option value="{{ $sale->id }}" {{ old('sale_id') == $sale->id ? 'selected' : '' }}>{{ $sale->invoice_number }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-list"></i> Sale Item</label>
+                            <select name="sale_item_id" required>
+                                <option value="">— Select item —</option>
+                                @foreach($retSaleItems as $item)
+                                    <option value="{{ $item->id }}" {{ old('sale_item_id') == $item->id ? 'selected' : '' }}>Item #{{ $item->id }} (Sale #{{ $item->sale_id }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-sort-numeric-up"></i> Quantity</label>
+                            <input type="number" step="0.001" min="0" name="quantity" value="{{ old('quantity', '') }}" placeholder="0.000" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-calendar-alt"></i> Return Date</label>
+                            <input type="date" name="return_date" value="{{ old('return_date', $lookups['today'] ?? '') }}" required>
+                        </div>
+                        <div class="full">
+                            <label><i class="fas fa-comment-alt"></i> Reason</label>
+                            <input name="reason" value="{{ old('reason', '') }}" placeholder="e.g. Damaged goods" required>
+                        </div>
+
+                    {{-- ════════════════════════════════
+                         EXPENSES
+                    ════════════════════════════════ --}}
+                    @elseif($module === 'expenses')
+                        @php $expBatches = $lookups['batches'] ?? collect(); @endphp
+                        <div>
+                            <label><i class="fas fa-industry"></i> Production Batch</label>
+                            <select name="production_batch_id" required>
+                                <option value="">— Select batch —</option>
+                                @foreach($expBatches as $batch)
+                                    <option value="{{ $batch->id }}" {{ old('production_batch_id') == $batch->id ? 'selected' : '' }}>{{ $batch->batch_number }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-tags"></i> Expense Type</label>
+                            <select name="type" required>
+                                <option value="">— Select type —</option>
+                                @foreach(['labor' => 'Labor', 'transport' => 'Transport', 'packaging' => 'Packaging', 'utilities' => 'Utilities'] as $val => $label)
+                                    <option value="{{ $val }}" {{ old('type') === $val ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-coins"></i> Amount (RWF)</label>
+                            <input type="number" step="0.01" min="0" name="amount" value="{{ old('amount', '') }}" placeholder="0.00" required>
+                        </div>
+                        <div class="full">
+                            <label><i class="fas fa-comment-alt"></i> Description <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                            <input name="description" value="{{ old('description', '') }}" placeholder="e.g. Daily labour wages">
+                        </div>
+
+                    {{-- ════════════════════════════════
+                         PAYMENTS
+                    ════════════════════════════════ --}}
+                    @elseif($module === 'payments')
+                        @php $paySales = $lookups['sales'] ?? collect(); @endphp
+                        <div>
+                            <label><i class="fas fa-file-invoice"></i> Sale</label>
+                            <select name="sale_id" required>
+                                <option value="">— Select sale —</option>
+                                @foreach($paySales as $sale)
+                                    <option value="{{ $sale->id }}" {{ old('sale_id') == $sale->id ? 'selected' : '' }}>{{ $sale->invoice_number }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-coins"></i> Amount (RWF)</label>
+                            <input type="number" step="0.01" min="0" name="amount" value="{{ old('amount', '') }}" placeholder="0.00" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-credit-card"></i> Payment Method</label>
+                            <select name="payment_method" required>
+                                <option value="">— Select —</option>
+                                @foreach(['cash' => 'Cash', 'mobile_money' => 'Mobile Money', 'bank_transfer' => 'Bank Transfer', 'credit' => 'Credit'] as $val => $label)
+                                    <option value="{{ $val }}" {{ old('payment_method') === $val ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-calendar-alt"></i> Payment Date</label>
+                            <input type="date" name="payment_date" value="{{ old('payment_date', $lookups['today'] ?? '') }}" required>
+                        </div>
+                        <div>
+                            <label><i class="fas fa-hashtag"></i> Reference <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                            <input name="reference" value="{{ old('reference', '') }}" placeholder="e.g. TXN-789456">
+                        </div>
+>>>>>>> Stashed changes
 
                     {{-- ════════════════════════════════
                          READ-ONLY MODULES
@@ -817,8 +1422,35 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                         <div class="full">
                             <p class="sub"><i class="fas fa-lock"></i> This module is ledger-driven and read-only in web view.</p>
                         </div>
+<<<<<<< Updated upstream
                     @endif
 
+                    @if($canCreate)
+                        <div class="full actions">
+                            <button class="primary" type="submit">
+                                <i class="fas {{ $editRecord ? 'fa-save' : 'fa-check' }}"></i>
+                                {{ $editRecord ? 'Update Record' : 'Save Record' }}
+                            </button>
+                            @if($editRecord)
+                                <a href="{{ route('modules.show', ['module' => $module]) }}"
+                                   class="secondary" style="text-decoration:none;">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            @else
+                                <button class="secondary" id="cancel-form-btn" type="button">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            @endif
+                        </div>
+=======
+>>>>>>> Stashed changes
+                    @endif
+                </form>
+            </div>
+        </div>
+
+<<<<<<< Updated upstream
+=======
                     @if($canCreate)
                         <div class="full actions">
                             <button class="primary" type="submit">
@@ -841,6 +1473,7 @@ td .actions { display: flex; gap: 8px; align-items: center; }
             </div>
         </div>
 
+>>>>>>> Stashed changes
         {{-- ── RECORDS TABLE ── --}}
         <section class="card">
             <h3 style="margin: 0 0 20px 0;">
@@ -884,10 +1517,22 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                 <th>Actions</th>
                             </tr>
                         @elseif($module === 'collections')
+<<<<<<< Updated upstream
                             <tr>
                                 <th>Farmer</th><th>Item Name</th><th>Location</th><th>Collection Date</th>
                                 <th>Collected (kg)</th><th>Accepted (kg)</th><th>Rejected (kg)</th><th>Price / kg</th><th>Actions</th>
                             </tr>
+=======
+                                <tr>
+                                <th>Farmer</th><th>Item Name</th><th>Location</th><th>Collection Date</th>
+                                <th>Collected (kg)</th><th>Accepted (kg)</th><th>Rejected (kg)</th>
+                                <th>Price / kg</th>
+                                <th>Total Price (RWF)</th>
+                                <th>Rejection Reason</th>
+                                <th>Actions</th>
+                            </tr>
+
+>>>>>>> Stashed changes
                         @elseif($module === 'farmers')
                             <tr>
                                 <th>Name</th><th>Phone</th><th>Country</th><th>Province</th>
@@ -906,6 +1551,7 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                             </tr>
                         @elseif($module === 'raw-inventory')
                             <tr>
+<<<<<<< Updated upstream
                                 <th>#</th>
                                 <th>Type</th>
                                 <th>Source</th>
@@ -917,6 +1563,28 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                         @elseif($module === 'production')
                             <tr>
                                 <th>Batch #</th>
+=======
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Movement Type</th>
+                                <th>Qty In</th>
+                                <th>Qty Out</th>
+                                <th>Unit</th>
+                                <th>Balance</th>
+                                <th>Warehouse</th>
+                                <th>Source</th>
+                                <th>Reference</th>
+                                <th>Supplier/Farmer</th>
+                                <th>Performed By</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                            </tr>
+
+
+                        @elseif($module === 'production')
+                            <tr>
+                                <th>Batch</th>
+>>>>>>> Stashed changes
                                 <th>Production Date</th>
                                 <th>Warehouse</th>
                                 <th>Maize Used (kg)</th>
@@ -971,6 +1639,17 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                     <td>{{ $record->quantity_rejected ?? ($record->rejected_quantity ?? '-') }}</td>
                                     <td>{{ $record->price_per_kg ?? '-' }}</td>
                                     <td>
+<<<<<<< Updated upstream
+=======
+                                        @php
+                                            $total = ($record->accepted_quantity ?? 0) * ($record->price_per_kg ?? 0);
+                                        @endphp
+                                        {{ $total > 0 ? number_format($total, 2) : '-' }}
+                                    </td>
+                                    <td>{{ $record->rejection_reason ?? '-' }}</td>
+
+                                    <td>
+>>>>>>> Stashed changes
                                         <div class="actions">
                                             <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}"
                                                class="secondary" style="text-decoration:none;">
@@ -1015,10 +1694,14 @@ td .actions { display: flex; gap: 8px; align-items: center; }
 
                             @elseif($normalizedModule === 'employees')
                                 <tr>
+<<<<<<< Updated upstream
                                     <td>
                                         <strong>{{ $record->full_name }}</strong>
                                         <div class="sub">{{ $record->employee_code }}</div>
                                     </td>
+=======
+                                    <td><strong>{{ $record->full_name ?? '-' }}</strong><div class="sub">{{ $record->employee_code ?? '-' }}</div></td>
+>>>>>>> Stashed changes
                                     <td>{{ $record->gender ?? '-' }}</td>
                                     <td>{{ $record->date_of_birth ? \Carbon\Carbon::parse($record->date_of_birth)->format('Y-m-d') : '-' }}</td>
                                     <td>{{ $record->nationality ?? '-' }}</td>
@@ -1032,6 +1715,7 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                     <td>{{ $record->hire_date ? \Carbon\Carbon::parse($record->hire_date)->format('Y-m-d') : '-' }}</td>
                                     <td>{{ $record->work_location ?? '-' }}</td>
                                     <td>
+<<<<<<< Updated upstream
                                         <span class="status-badge {{ strtolower($record->status ?? 'inactive') }}">
                                             {{ $record->status ?? 'Inactive' }}
                                         </span>
@@ -1045,6 +1729,16 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                             <form method="POST"
                                                   action="{{ route('modules.destroy', ['module' => $module, 'id' => $record->id]) }}"
                                                   onsubmit="return confirm('Delete this record?')">
+=======
+                                        <span class="status-badge {{ strtolower($record->status ?? 'inactive') }}">{{ $record->status ?? 'Inactive' }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="actions">
+                                            <a href="{{ route('modules.edit', ['module' => $module, 'id' => $record->id]) }}" class="secondary" style="text-decoration:none;">
+                                                <i class="fas fa-pen"></i> Edit
+                                            </a>
+                                            <form method="POST" action="{{ route('modules.destroy', ['module' => $module, 'id' => $record->id]) }}" onsubmit="return confirm('Delete this record?')">
+>>>>>>> Stashed changes
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="danger"><i class="fas fa-trash"></i></button>
                                             </form>
@@ -1052,9 +1746,48 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                     </td>
                                 </tr>
 
+<<<<<<< Updated upstream
                             @elseif($module === 'raw-inventory')
                                 <tr>
                                     <td>{{ $record->id }}</td>
+=======
+
+                            @elseif($module === 'raw-inventory')
+                                <tr>
+                                    @php
+                                        $qty = (float) ($record->quantity ?? 0);
+                                        $qtyIn = $record->type === 'IN' ? $qty : 0;
+                                        $qtyOut = $record->type === 'OUT' ? $qty : 0;
+                                        $unit = 'kg';
+
+                                        $collection = $record->collection;
+                                        $supplierFarmer = $collection?->farmer?->name ?? '-';
+
+                                        $product = $collection?->product_name
+                                            ?? $collection?->product?->name
+                                            ?? (optional($record->productionBatch)->product?->name)
+                                            ?? '-';
+
+                                        $reference = '-';
+                                        if ($record->source === 'collection' && $collection) {
+                                            $reference = 'Collection #'.$collection->id;
+                                        } elseif ($record->productionBatch) {
+                                            $reference = $record->productionBatch->batch_number ?? ('Batch #'.$record->production_batch_id);
+                                        } elseif ($record->reference_id) {
+                                            $reference = (string) $record->reference_id;
+                                        }
+
+                                        $notes = $collection?->notes ?? ($collection?->note ?? '-');
+
+
+                                        // NOTE: This ledger currently does not store performed_by/status/unit/balance.
+                                        $performedBy = $record->performed_by ?? '-';
+                                        $status = $record->status ?? '-';
+                                    @endphp
+
+                                    <td>{{ $record->movement_date ? \Carbon\Carbon::parse($record->movement_date)->format('Y-m-d H:i') : '-' }}</td>
+                                    <td>{{ $product }}</td>
+>>>>>>> Stashed changes
                                     <td>
                                         @if($record->type === 'IN')
                                             <span class="status-badge active">IN</span>
@@ -1062,6 +1795,7 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                             <span class="status-badge inactive">OUT</span>
                                         @endif
                                     </td>
+<<<<<<< Updated upstream
                                     <td style="text-transform:capitalize">{{ $record->source ?? '-' }}</td>
                                     <td>{{ number_format($record->quantity, 3) }} kg</td>
                                     <td>{{ $record->location?->name ?? '-' }}</td>
@@ -1082,6 +1816,22 @@ td .actions { display: flex; gap: 8px; align-items: center; }
                                     </td>
                                     <td>{{ $record->movement_date ? \Carbon\Carbon::parse($record->movement_date)->format('Y-m-d H:i') : '-' }}</td>
                                 </tr>
+=======
+                                    <td>{{ $qtyIn > 0 ? number_format($qtyIn, 3) : '-' }}</td>
+                                    <td>{{ $qtyOut > 0 ? number_format($qtyOut, 3) : '-' }}</td>
+                                    <td>{{ $unit }}</td>
+                                    <td>-</td>
+                                    <td>{{ $record->location?->name ?? '-' }}</td>
+                                    <td style="text-transform:capitalize">{{ $record->source ?? '-' }}</td>
+                                    <td>{{ $reference }}</td>
+                                    <td>{{ $supplierFarmer }}</td>
+                                    <td>{{ $performedBy }}</td>
+                                    <td>{{ $status }}</td>
+                                    <td>{{ $notes }}</td>
+                                </tr>
+
+
+>>>>>>> Stashed changes
                             @elseif($module === 'production')
                                 <tr>
                                     <td>
@@ -1187,6 +1937,32 @@ td .actions { display: flex; gap: 8px; align-items: center; }
     natSelect?.addEventListener('change', toggleNatOther);
     toggleNatOther(); // run on load in case of old() value
 
+<<<<<<< Updated upstream
+=======
+    /* ── PRODUCTION: filter packages by selected product ── */
+    (function () {
+        const productSel = document.getElementById('prod-product-select');
+        const packageSel = document.getElementById('prod-package-select');
+        if (!productSel || !packageSel) return;
+
+        const allOptions = Array.from(packageSel.querySelectorAll('option'));
+
+        function filterPackages() {
+            const pid = productSel.value;
+            allOptions.forEach(opt => {
+                if (!opt.value) return; // keep the placeholder
+                opt.style.display = (!pid || opt.dataset.product === pid) ? '' : 'none';
+            });
+            // reset selection if current selection no longer matches
+            const selected = packageSel.querySelector('option:checked');
+            if (selected && selected.style.display === 'none') packageSel.value = '';
+        }
+
+        productSel.addEventListener('change', filterPackages);
+        filterPackages(); // run on load for edit form
+    })();
+
+>>>>>>> Stashed changes
     /* ── LIVE SEARCH ── */
     (function () {
         const input   = document.getElementById('table-search');

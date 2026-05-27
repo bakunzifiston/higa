@@ -22,7 +22,9 @@ class MaizeCollection extends Model
         'accepted_quantity',
         'price_per_kg',
         'rejection_reason',
+        'notes',
     ];
+
 
     protected $casts = [
         'collection_date' => 'date',

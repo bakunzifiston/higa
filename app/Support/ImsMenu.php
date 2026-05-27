@@ -8,6 +8,7 @@ class ImsMenu
 {
     // Module access by role slug
     private const ROLE_MODULES = [
+<<<<<<< Updated upstream
         'admin' => null, // null = all modules
         'collection-officer' => ['farmers', 'locations', 'collections', 'raw-inventory'],
         'production-manager' => ['raw-inventory', 'production', 'products', 'finished-inventory', 'expenses'],
@@ -19,6 +20,17 @@ class ImsMenu
      * @return list<array{slug: string, label: string, href: string, icon: string}>
      */
     public static function moduleNav(?User $user = null): array
+=======
+        'admin' => null,
+        'collection-officer' => ['farmers', 'locations', 'collections', 'raw-inventory', 'employees'],
+        'production-manager' => ['locations', 'raw-inventory', 'production', 'products', 'finished-inventory', 'expenses', 'employees'],
+        'sales-team' => ['sales', 'returns', 'payments', 'expenses', 'employees'],
+    ];
+
+
+    /** @return list<array{slug: string, label: string, endpoint: string, icon: string}> */
+    private static function menuTemplate(): array
+>>>>>>> Stashed changes
     {
         $all = [
             ['slug' => 'dashboard', 'label' => 'Dashboard', 'href' => route('dashboard'), 'icon' => 'fa-solid fa-chart-line'],
@@ -33,6 +45,7 @@ class ImsMenu
             ['slug' => 'returns', 'label' => 'Returns', 'href' => route('modules.show', ['module' => 'returns']), 'icon' => 'fa-solid fa-rotate-left'],
             ['slug' => 'expenses', 'label' => 'Expenses', 'href' => route('modules.show', ['module' => 'expenses']), 'icon' => 'fa-solid fa-money-bill-wave'],
             ['slug' => 'payments', 'label' => 'Payments', 'href' => route('modules.show', ['module' => 'payments']), 'icon' => 'fa-solid fa-hand-holding-dollar'],
+            ['slug' => 'employees', 'label' => 'Employees', 'href' => route('modules.show', ['module' => 'employees']), 'icon' => 'fa-solid fa-user-tie'],
             ['slug' => 'profile', 'label' => 'Profile', 'href' => route('profile.edit'), 'icon' => 'fa-solid fa-user'],
         ];
 

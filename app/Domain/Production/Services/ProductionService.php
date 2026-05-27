@@ -91,12 +91,14 @@ class ProductionService
                 );
             }
 
-            $this->rawInventoryService->moveOutToProduction(
+            // FIFO deduction from oldest available maize collections (leftovers spill across batches)
+            $this->rawInventoryService->moveOutToProductionFifoFromCollections(
                 locationId: (int) $batch->location_id,
-                batchId: (int) $batch->id,
+                productionBatchId: (int) $batch->id,
                 quantity: $maizeUsed,
                 dateTime: $batch->production_date->toDateString() . ' 00:00:00',
             );
+
 
             return $batch->load(['inputs', 'outputs', 'wastage']);
         });
